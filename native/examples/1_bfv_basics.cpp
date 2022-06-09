@@ -177,7 +177,8 @@ void example_bfv_basics()
     a real use-case the Evaluator would not be constructed by the same party
     that holds the secret key.
     */
-    Evaluator evaluator(context);
+    CKKSEncoder ckks_encoder(context);
+    Evaluator evaluator(context, ckks_encoder);
 
     /*
     We will of course want to decrypt our results to verify that everything worked,

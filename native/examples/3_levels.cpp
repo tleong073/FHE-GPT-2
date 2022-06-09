@@ -177,7 +177,8 @@ void example_levels()
     cout << "    + relin_keys:  " << relin_keys.parms_id() << endl;
 
     Encryptor encryptor(context, public_key);
-    Evaluator evaluator(context);
+    CKKSEncoder ckks_encoder(context);
+    Evaluator evaluator(context, ckks_encoder);
     Decryptor decryptor(context, secret_key);
 
     /*

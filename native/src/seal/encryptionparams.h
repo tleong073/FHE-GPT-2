@@ -170,6 +170,68 @@ namespace seal
             compute_parms_id();
         }
 
+        /*
+        J.-W. Lee: newly inserted for secret key hamming weight. The original 
+        SEAL library uses only the uniform ternary secret key distribution.
+        Since the bootstrapping requires sparse secret key distrubition for 
+        some parameters, the secret key hamming weight is added in 
+        EncryptionParameters as a member variable. If the secret key distribution
+        is not sparse, the secret key hamming weight is set to be zero. Non-zero
+        secret key hamming weight means the sparse secret key distribution.
+
+        @param[in] secret_key_hamming_weight The new secret key hamming weight 
+        @throws std::logic_error if a valid scheme is not set and secret key
+        hamming weight is non-zero
+        */
+
+        inline void set_secret_key_hamming_weight(std::size_t secret_key_hamming_weight)
+        {
+            if (scheme_ == scheme_type::none && secret_key_hamming_weight)
+            {
+                throw std::logic_error("secret key hamming weight is not supported for this scheme");
+            }
+
+            // Set the degree
+            secret_key_hamming_weight_ = secret_key_hamming_weight;
+
+            // Re-compute the parms_id
+            compute_parms_id();
+        }
+
+        /*
+        J.-W. Lee: newly inserted for the number of sparse slots. The original 
+        SEAL library uses only the full slot, which is the half of polynomial 
+        modulus degree. However, the runtime of the bootstrapping is affected
+        by the number of sparse slots, and thus we add the number of sparse
+        slots as a member variable. The number of sparse slots should be 
+        positive power-of-two integer less than polynomial modulus degree.
+        If the full slot is used, the sparse_slots is set to be zero. Non-zero
+        sparse_slots means to use the sparse slot.
+
+        @param[in] sparse_slots The number of sparse slots 
+        @throws std::logic_error if a valid scheme is not set and sparse_slots
+        is non-zero, or if sparse_slots is not power-of-two integer or zero.
+        */
+
+        inline void set_sparse_slots(std::size_t sparse_slots)
+        {
+            if (scheme_ == scheme_type::none && sparse_slots)
+            {
+                throw std::logic_error("secret key hamming weight is not supported for this scheme");
+            }
+
+            if ((sparse_slots & (sparse_slots - 1)) != 0)
+            {
+                throw std::logic_error("secret key hamming weight is not zero or power-of-two");
+            }
+
+            // Set the degree
+            sparse_slots_= sparse_slots;
+
+            // Re-compute the parms_id
+            compute_parms_id();
+        }
+
         /**
         Sets the coefficient modulus parameter. The coefficient modulus consists
         of a list of distinct prime numbers, and is represented by a vector of
@@ -279,6 +341,22 @@ namespace seal
         SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
         {
             return poly_modulus_degree_;
+        }
+
+        /**
+        J.-W. Lee: Returns the secret key hamming weight.
+        */
+        SEAL_NODISCARD inline std::size_t secret_key_hamming_weight() const noexcept
+        {
+            return secret_key_hamming_weight_;
+        }
+
+        /**
+        J.-W. Lee: Returns the number of sparse slots. (zero means the full slots)
+        */
+        SEAL_NODISCARD inline std::size_t sparse_slots() const noexcept
+        {
+            return sparse_slots_;
         }
 
         /**
@@ -491,6 +569,10 @@ namespace seal
         scheme_type scheme_;
 
         std::size_t poly_modulus_degree_ = 0;
+
+        std::size_t secret_key_hamming_weight_ = 0;
+
+        std::size_t sparse_slots_ = 0;
 
         std::vector<Modulus> coeff_modulus_{};
 

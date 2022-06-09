@@ -63,7 +63,8 @@ void bfv_performance_test(SEALContext context)
 
     Encryptor encryptor(context, public_key);
     Decryptor decryptor(context, secret_key);
-    Evaluator evaluator(context);
+    CKKSEncoder ckks_encoder(context);
+    Evaluator evaluator(context, ckks_encoder);
     BatchEncoder batch_encoder(context);
 
     /*
@@ -389,8 +390,8 @@ void ckks_performance_test(SEALContext context)
 
     Encryptor encryptor(context, public_key);
     Decryptor decryptor(context, secret_key);
-    Evaluator evaluator(context);
     CKKSEncoder ckks_encoder(context);
+    Evaluator evaluator(context, ckks_encoder);
 
     chrono::microseconds time_encode_sum(0);
     chrono::microseconds time_decode_sum(0);

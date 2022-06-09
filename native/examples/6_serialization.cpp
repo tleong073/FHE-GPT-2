@@ -340,7 +340,8 @@ void example_serialization()
         parms_stream.seekg(0, parms_stream.beg);
         SEALContext context(parms);
 
-        Evaluator evaluator(context);
+        CKKSEncoder encoder(context);
+        Evaluator evaluator(context, encoder);
 
         /*
         Next we need to load relinearization keys and the ciphertexts from our

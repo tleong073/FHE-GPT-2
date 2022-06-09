@@ -74,7 +74,8 @@ void example_batch_encoder()
     RelinKeys relin_keys;
     keygen.create_relin_keys(relin_keys);
     Encryptor encryptor(context, public_key);
-    Evaluator evaluator(context);
+    CKKSEncoder ckks_encoder(context);
+    Evaluator evaluator(context, ckks_encoder);
     Decryptor decryptor(context, secret_key);
 
     /*
@@ -243,7 +244,8 @@ void example_ckks_encoder()
     We also set up an Encryptor, Evaluator, and Decryptor as usual.
     */
     Encryptor encryptor(context, public_key);
-    Evaluator evaluator(context);
+    CKKSEncoder ckks_encoder(context);
+    Evaluator evaluator(context, ckks_encoder);
     Decryptor decryptor(context, secret_key);
 
     /*

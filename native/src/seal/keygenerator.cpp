@@ -61,6 +61,7 @@ namespace seal
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
+        size_t hamming_weight = parms.secret_key_hamming_weight(); // J.-W. Lee: newly added
 
         if (!is_initialized)
         {
@@ -71,7 +72,8 @@ namespace seal
 
             // Generate secret key
             RNSIter secret_key(secret_key_.data().data(), coeff_count);
-            sample_poly_ternary(parms.random_generator()->create(), parms, secret_key);
+            if(!hamming_weight) sample_poly_ternary(parms.random_generator()->create(), parms, secret_key); // J.-W. Lee: Zero hamming weight means the original ternary distribution
+            else sample_poly_sparse_ternary(parms.random_generator()->create(), parms, secret_key); // J.-W. Lee: newly added
 
             // Transform the secret s into NTT representation.
             auto ntt_tables = context_data.small_ntt_tables();

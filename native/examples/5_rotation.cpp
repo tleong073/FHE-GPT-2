@@ -33,7 +33,8 @@ void example_rotation_bfv()
     RelinKeys relin_keys;
     keygen.create_relin_keys(relin_keys);
     Encryptor encryptor(context, public_key);
-    Evaluator evaluator(context);
+    CKKSEncoder ckks_encoder(context);
+    Evaluator evaluator(context, ckks_encoder);
     Decryptor decryptor(context, secret_key);
 
     BatchEncoder batch_encoder(context);
@@ -149,11 +150,11 @@ void example_rotation_ckks()
     keygen.create_relin_keys(relin_keys);
     GaloisKeys galois_keys;
     keygen.create_galois_keys(galois_keys);
+    CKKSEncoder ckks_encoder(context);
     Encryptor encryptor(context, public_key);
-    Evaluator evaluator(context);
+    Evaluator evaluator(context, ckks_encoder);
     Decryptor decryptor(context, secret_key);
 
-    CKKSEncoder ckks_encoder(context);
 
     size_t slot_count = ckks_encoder.slot_count();
     cout << "Number of slots: " << slot_count << endl;
@@ -201,6 +202,6 @@ void example_rotation()
     /*
     Run all rotation examples.
     */
-    example_rotation_bfv();
+    // example_rotation_bfv();
     example_rotation_ckks();
 }

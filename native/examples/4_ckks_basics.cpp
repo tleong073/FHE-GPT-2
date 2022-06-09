@@ -74,6 +74,20 @@ void example_ckks_basics()
     parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 60, 40, 40, 60 }));
 
     /*
+    J.-W. Lee: The secret key hamming weight is added in the encryption parameter
+    set. Non-zero value means the orignal ternary secret key distribution.
+    */
+    size_t secret_key_hamming_weight = 192;
+    parms.set_secret_key_hamming_weight(secret_key_hamming_weight);
+
+    /*
+    J.-W. Lee: The sparse_slots is added in the encryption parameter
+    set. Non-zero value means the orignal full slot.
+    */
+    // size_t sparse_slots = 1024;
+    // parms.set_sparse_slots(sparse_slots);
+
+    /*
     We choose the initial scale to be 2^40. At the last level, this leaves us
     60-40=20 bits of precision before the decimal point, and enough (roughly
     10-20 bits) of precision after the decimal point. Since our intermediate
@@ -94,11 +108,11 @@ void example_ckks_basics()
     keygen.create_relin_keys(relin_keys);
     GaloisKeys gal_keys;
     keygen.create_galois_keys(gal_keys);
+    CKKSEncoder encoder(context);
     Encryptor encryptor(context, public_key);
-    Evaluator evaluator(context);
+    Evaluator evaluator(context, encoder);
     Decryptor decryptor(context, secret_key);
 
-    CKKSEncoder encoder(context);
     size_t slot_count = encoder.slot_count();
     cout << "Number of slots: " << slot_count << endl;
 
@@ -261,8 +275,8 @@ void example_ckks_basics()
     */
     print_line(__LINE__);
     cout << "Normalize scales to 2^40." << endl;
-    x3_encrypted.scale() = pow(2.0, 40);
-    x1_encrypted.scale() = pow(2.0, 40);
+    // x3_encrypted.scale() = pow(2.0, 40);
+    // x1_encrypted.scale() = pow(2.0, 40);
 
     /*
     We still have a problem with mismatching encryption parameters. This is easy
@@ -273,7 +287,7 @@ void example_ckks_basics()
     print_line(__LINE__);
     cout << "Normalize encryption parameters to the lowest level." << endl;
     parms_id_type last_parms_id = x3_encrypted.parms_id();
-    evaluator.mod_switch_to_inplace(x1_encrypted, last_parms_id);
+    // evaluator.mod_switch_to_inplace(x1_encrypted, last_parms_id);
     evaluator.mod_switch_to_inplace(plain_coeff0, last_parms_id);
 
     /*
@@ -282,8 +296,10 @@ void example_ckks_basics()
     print_line(__LINE__);
     cout << "Compute PI*x^3 + 0.4*x + 1." << endl;
     Ciphertext encrypted_result;
-    evaluator.add(x3_encrypted, x1_encrypted, encrypted_result);
-    evaluator.add_plain_inplace(encrypted_result, plain_coeff0);
+    evaluator.add_reduced_error(x3_encrypted, x1_encrypted, encrypted_result);
+    // evaluator.add(x3_encrypted, x1_encrypted, encrypted_result);
+    // evaluator.add_plain_inplace(encrypted_result, plain_coeff0);
+    evaluator.add_const_inplace(encrypted_result, 1.0);
 
     /*
     First print the true result.

@@ -37,6 +37,38 @@ namespace seal
             });
         }
 
+        void sample_poly_sparse_ternary(
+            shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
+        {
+            auto coeff_modulus = parms.coeff_modulus();
+            size_t coeff_modulus_size = coeff_modulus.size();
+            size_t coeff_count = parms.poly_modulus_degree();
+            size_t hamming_weight = parms.secret_key_hamming_weight();
+            size_t current_weight = 0;
+
+            RandomToStandardAdapter engine(prng);
+            uniform_int_distribution<uint64_t> dist(0, 1), dist_non_zero_position(0, coeff_count);
+
+            SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
+                SEAL_ITERATE(
+                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
+                    [&](auto J) { *get<0>(J) = 0; });
+            });
+
+            while (current_weight < hamming_weight) {
+                size_t index = dist_non_zero_position(engine);
+                if (destination[index] != 0) continue;
+                uint64_t nonzero_rand = 2 * dist(engine);
+                uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(nonzero_rand == 0));
+                auto iter_start = destination + index;
+                SEAL_ITERATE(
+                    iter(StrideIter<uint64_t *>(iter_start, coeff_count), coeff_modulus), coeff_modulus_size,
+                    [&](auto I) { *get<0>(I) = nonzero_rand + (flag & get<1>(I).value()) - 1; }
+                );
+                current_weight++;
+            }
+        }
+
         void sample_poly_normal(
             shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
         {
