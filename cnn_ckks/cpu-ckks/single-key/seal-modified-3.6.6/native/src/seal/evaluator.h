@@ -1267,6 +1267,23 @@ namespace seal
             }
         }
 
+		template <typename T, typename = std::enable_if_t<std::is_same<std::remove_cv_t<T>, double>::value ||std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+		void multiply_vector_inplace_reduced_error(Ciphertext &encrypted, const std::vector<T> &value)
+		{
+			Plaintext plain;
+			
+			encoder_.encode(value, encrypted.scale(), plain);
+			mod_switch_to_inplace(plain, encrypted.parms_id());
+			multiply_plain_inplace(encrypted, plain);
+		}
+
+		template <typename T, typename = std::enable_if_t<std::is_same<std::remove_cv_t<T>, double>::value ||std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+		inline void multiply_vector_reduced_error(Ciphertext &encrypted, const std::vector<T> &value, Ciphertext &destination)
+		{
+			destination = encrypted;
+			multiply_vector_inplace_reduced_error(destination, value);
+		}
+
 
         /**
         Enables access to private members of seal::Evaluator for SEAL_C.

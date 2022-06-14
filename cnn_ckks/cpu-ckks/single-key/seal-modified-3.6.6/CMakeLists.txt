@@ -379,6 +379,11 @@ if(NOT BUILD_SHARED_LIBS)
     seal_link_threads(seal)
     seal_install_target(seal SEALTargets)
 
+	# this is added by E.-S.Lee to use OpenMP
+	target_compile_options(seal PRIVATE -fopenmp)
+	target_include_directories(seal PUBLIC /usr/include /usr/local/include)
+	target_link_libraries(seal PUBLIC gomp)
+
     if(SEAL_USE_MSGSL)
         if(SEAL_BUILD_DEPS)
             target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${msgsl_SOURCE_DIR}/include>)

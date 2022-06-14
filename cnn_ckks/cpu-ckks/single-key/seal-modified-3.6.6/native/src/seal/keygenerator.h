@@ -13,6 +13,7 @@
 #include "seal/util/defines.h"
 #include "seal/util/iterator.h"
 #include <random>
+#include <omp.h>	// added by E.-S. Lee
 
 namespace seal
 {

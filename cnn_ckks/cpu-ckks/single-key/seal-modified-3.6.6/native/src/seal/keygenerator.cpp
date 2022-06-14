@@ -163,6 +163,7 @@ namespace seal
 
     GaloisKeys KeyGenerator::create_galois_keys(const vector<uint32_t> &galois_elts, bool save_seed)
     {
+
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
         {
@@ -194,8 +195,12 @@ namespace seal
         // The max number of keys is equal to number of coefficients
         galois_keys.data().resize(coeff_count);
 
-        for (auto galois_elt : galois_elts)
+        // for (auto galois_elt : galois_elts)
+		#pragma omp parallel for num_threads(80)	// modified for fast key generation by E.-S. Lee
+		for(size_t i=0; i<galois_elts.size(); i++)	// modified for fast key generation by E.-S. Lee
         {
+			uint32_t galois_elt = galois_elts[i];	// modified for fast key generation by E.-S. Lee
+
             // Verify coprime conditions.
             if (!(galois_elt & 1) || (galois_elt >= coeff_count << 1))
             {

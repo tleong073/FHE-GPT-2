@@ -1,0 +1,31 @@
+layer 0
+multiplexed parallel convolution...
+time : 16429 ms
+remaining level : 17
+scale: 2.2518e+15
+
+multiplexed parallel batch normalization...
+time : 445 ms
+remaining level : 16
+scale: 7.03687e+13
+
+approximate ReLU...
+time : 10908 ms
+remaining level : 2
+scale: 7.0449e+13
+
+intermediate decrypted values: 
+( (-3.34755e-07,3.36948e-11), (-9.78619e-07,-1.28856e-11), (-9.50899e-07,4.14926e-12), (5.42099e-07,3.21579e-12), ... (0.0258039,-1.66476e-11))
+
+layer 1
+multiplexed parallel convolution...
+time : 11675 ms
+remaining level : 0
+scale: 7.06905e+13
+
+multiplexed parallel batch normalization...
+time : 656 ms
+remaining level : 0
+scale: 7.06905e+13
+
+approximate ReLU...

@@ -1,6 +1,6 @@
 #include <iostream>
-// #include "cnn_seal.h"
-// #include "infer_seal.h"
+#include "cnn_seal.h"
+#include "infer_seal.h"
 #include <algorithm>
 
 using namespace std;
@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 	cout << "start image: " << start << endl;
 	cout << "end image: " << end << endl;
 
-	// if (dataset == 10) ResNet_cifar10_seal_sparse(layer, start, end);
+	if (dataset == 10) ResNet_cifar10_seal_sparse(layer, start, end);
 	// else if (dataset == 100) ResNet_cifar100_seal_sparse(layer, start, end);
 	// else throw std::invalid_argument("dataset number is not correct");
 

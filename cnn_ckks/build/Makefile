@@ -56,17 +56,6 @@ CMAKE_BINARY_DIR = /home/eslee3209/FHE-MP-CNN/cnn_ckks/build
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
@@ -77,6 +66,17 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -111,17 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named compare
+# Target rules for targets named cnn
 
 # Build rule for target.
-compare: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 compare
-.PHONY : compare
+cnn: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 cnn
+.PHONY : cnn
 
 # fast build rule for target.
-compare/fast:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/build
-.PHONY : compare/fast
+cnn/fast:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/build
+.PHONY : cnn/fast
 
 common/Choosemax.o: common/Choosemax.cpp.o
 
@@ -129,7 +129,7 @@ common/Choosemax.o: common/Choosemax.cpp.o
 
 # target to build an object file
 common/Choosemax.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Choosemax.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Choosemax.cpp.o
 .PHONY : common/Choosemax.cpp.o
 
 common/Choosemax.i: common/Choosemax.cpp.i
@@ -138,7 +138,7 @@ common/Choosemax.i: common/Choosemax.cpp.i
 
 # target to preprocess a source file
 common/Choosemax.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Choosemax.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Choosemax.cpp.i
 .PHONY : common/Choosemax.cpp.i
 
 common/Choosemax.s: common/Choosemax.cpp.s
@@ -147,7 +147,7 @@ common/Choosemax.s: common/Choosemax.cpp.s
 
 # target to generate assembly for a file
 common/Choosemax.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Choosemax.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Choosemax.cpp.s
 .PHONY : common/Choosemax.cpp.s
 
 common/MinicompFunc.o: common/MinicompFunc.cpp.o
@@ -156,7 +156,7 @@ common/MinicompFunc.o: common/MinicompFunc.cpp.o
 
 # target to build an object file
 common/MinicompFunc.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/MinicompFunc.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/MinicompFunc.cpp.o
 .PHONY : common/MinicompFunc.cpp.o
 
 common/MinicompFunc.i: common/MinicompFunc.cpp.i
@@ -165,7 +165,7 @@ common/MinicompFunc.i: common/MinicompFunc.cpp.i
 
 # target to preprocess a source file
 common/MinicompFunc.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/MinicompFunc.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/MinicompFunc.cpp.i
 .PHONY : common/MinicompFunc.cpp.i
 
 common/MinicompFunc.s: common/MinicompFunc.cpp.s
@@ -174,7 +174,7 @@ common/MinicompFunc.s: common/MinicompFunc.cpp.s
 
 # target to generate assembly for a file
 common/MinicompFunc.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/MinicompFunc.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/MinicompFunc.cpp.s
 .PHONY : common/MinicompFunc.cpp.s
 
 common/MinicompRemez.o: common/MinicompRemez.cpp.o
@@ -183,7 +183,7 @@ common/MinicompRemez.o: common/MinicompRemez.cpp.o
 
 # target to build an object file
 common/MinicompRemez.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/MinicompRemez.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/MinicompRemez.cpp.o
 .PHONY : common/MinicompRemez.cpp.o
 
 common/MinicompRemez.i: common/MinicompRemez.cpp.i
@@ -192,7 +192,7 @@ common/MinicompRemez.i: common/MinicompRemez.cpp.i
 
 # target to preprocess a source file
 common/MinicompRemez.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/MinicompRemez.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/MinicompRemez.cpp.i
 .PHONY : common/MinicompRemez.cpp.i
 
 common/MinicompRemez.s: common/MinicompRemez.cpp.s
@@ -201,7 +201,7 @@ common/MinicompRemez.s: common/MinicompRemez.cpp.s
 
 # target to generate assembly for a file
 common/MinicompRemez.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/MinicompRemez.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/MinicompRemez.cpp.s
 .PHONY : common/MinicompRemez.cpp.s
 
 common/Point.o: common/Point.cpp.o
@@ -210,7 +210,7 @@ common/Point.o: common/Point.cpp.o
 
 # target to build an object file
 common/Point.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Point.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Point.cpp.o
 .PHONY : common/Point.cpp.o
 
 common/Point.i: common/Point.cpp.i
@@ -219,7 +219,7 @@ common/Point.i: common/Point.cpp.i
 
 # target to preprocess a source file
 common/Point.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Point.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Point.cpp.i
 .PHONY : common/Point.cpp.i
 
 common/Point.s: common/Point.cpp.s
@@ -228,7 +228,7 @@ common/Point.s: common/Point.cpp.s
 
 # target to generate assembly for a file
 common/Point.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Point.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Point.cpp.s
 .PHONY : common/Point.cpp.s
 
 common/PolyUpdate.o: common/PolyUpdate.cpp.o
@@ -237,7 +237,7 @@ common/PolyUpdate.o: common/PolyUpdate.cpp.o
 
 # target to build an object file
 common/PolyUpdate.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/PolyUpdate.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/PolyUpdate.cpp.o
 .PHONY : common/PolyUpdate.cpp.o
 
 common/PolyUpdate.i: common/PolyUpdate.cpp.i
@@ -246,7 +246,7 @@ common/PolyUpdate.i: common/PolyUpdate.cpp.i
 
 # target to preprocess a source file
 common/PolyUpdate.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/PolyUpdate.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/PolyUpdate.cpp.i
 .PHONY : common/PolyUpdate.cpp.i
 
 common/PolyUpdate.s: common/PolyUpdate.cpp.s
@@ -255,7 +255,7 @@ common/PolyUpdate.s: common/PolyUpdate.cpp.s
 
 # target to generate assembly for a file
 common/PolyUpdate.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/PolyUpdate.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/PolyUpdate.cpp.s
 .PHONY : common/PolyUpdate.cpp.s
 
 common/Polynomial.o: common/Polynomial.cpp.o
@@ -264,7 +264,7 @@ common/Polynomial.o: common/Polynomial.cpp.o
 
 # target to build an object file
 common/Polynomial.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Polynomial.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Polynomial.cpp.o
 .PHONY : common/Polynomial.cpp.o
 
 common/Polynomial.i: common/Polynomial.cpp.i
@@ -273,7 +273,7 @@ common/Polynomial.i: common/Polynomial.cpp.i
 
 # target to preprocess a source file
 common/Polynomial.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Polynomial.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Polynomial.cpp.i
 .PHONY : common/Polynomial.cpp.i
 
 common/Polynomial.s: common/Polynomial.cpp.s
@@ -282,7 +282,7 @@ common/Polynomial.s: common/Polynomial.cpp.s
 
 # target to generate assembly for a file
 common/Polynomial.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Polynomial.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Polynomial.cpp.s
 .PHONY : common/Polynomial.cpp.s
 
 common/Remez.o: common/Remez.cpp.o
@@ -291,7 +291,7 @@ common/Remez.o: common/Remez.cpp.o
 
 # target to build an object file
 common/Remez.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Remez.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Remez.cpp.o
 .PHONY : common/Remez.cpp.o
 
 common/Remez.i: common/Remez.cpp.i
@@ -300,7 +300,7 @@ common/Remez.i: common/Remez.cpp.i
 
 # target to preprocess a source file
 common/Remez.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Remez.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Remez.cpp.i
 .PHONY : common/Remez.cpp.i
 
 common/Remez.s: common/Remez.cpp.s
@@ -309,7 +309,7 @@ common/Remez.s: common/Remez.cpp.s
 
 # target to generate assembly for a file
 common/Remez.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/Remez.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/Remez.cpp.s
 .PHONY : common/Remez.cpp.s
 
 common/RemezApp.o: common/RemezApp.cpp.o
@@ -318,7 +318,7 @@ common/RemezApp.o: common/RemezApp.cpp.o
 
 # target to build an object file
 common/RemezApp.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/RemezApp.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/RemezApp.cpp.o
 .PHONY : common/RemezApp.cpp.o
 
 common/RemezApp.i: common/RemezApp.cpp.i
@@ -327,7 +327,7 @@ common/RemezApp.i: common/RemezApp.cpp.i
 
 # target to preprocess a source file
 common/RemezApp.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/RemezApp.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/RemezApp.cpp.i
 .PHONY : common/RemezApp.cpp.i
 
 common/RemezApp.s: common/RemezApp.cpp.s
@@ -336,7 +336,7 @@ common/RemezApp.s: common/RemezApp.cpp.s
 
 # target to generate assembly for a file
 common/RemezApp.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/RemezApp.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/RemezApp.cpp.s
 .PHONY : common/RemezApp.cpp.s
 
 common/func.o: common/func.cpp.o
@@ -345,7 +345,7 @@ common/func.o: common/func.cpp.o
 
 # target to build an object file
 common/func.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/func.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/func.cpp.o
 .PHONY : common/func.cpp.o
 
 common/func.i: common/func.cpp.i
@@ -354,7 +354,7 @@ common/func.i: common/func.cpp.i
 
 # target to preprocess a source file
 common/func.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/func.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/func.cpp.i
 .PHONY : common/func.cpp.i
 
 common/func.s: common/func.cpp.s
@@ -363,8 +363,62 @@ common/func.s: common/func.cpp.s
 
 # target to generate assembly for a file
 common/func.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/common/func.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/common/func.cpp.s
 .PHONY : common/func.cpp.s
+
+cpu-ckks/single-key/cnn/cnn_seal.o: cpu-ckks/single-key/cnn/cnn_seal.cpp.o
+
+.PHONY : cpu-ckks/single-key/cnn/cnn_seal.o
+
+# target to build an object file
+cpu-ckks/single-key/cnn/cnn_seal.cpp.o:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/cnn/cnn_seal.cpp.o
+.PHONY : cpu-ckks/single-key/cnn/cnn_seal.cpp.o
+
+cpu-ckks/single-key/cnn/cnn_seal.i: cpu-ckks/single-key/cnn/cnn_seal.cpp.i
+
+.PHONY : cpu-ckks/single-key/cnn/cnn_seal.i
+
+# target to preprocess a source file
+cpu-ckks/single-key/cnn/cnn_seal.cpp.i:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/cnn/cnn_seal.cpp.i
+.PHONY : cpu-ckks/single-key/cnn/cnn_seal.cpp.i
+
+cpu-ckks/single-key/cnn/cnn_seal.s: cpu-ckks/single-key/cnn/cnn_seal.cpp.s
+
+.PHONY : cpu-ckks/single-key/cnn/cnn_seal.s
+
+# target to generate assembly for a file
+cpu-ckks/single-key/cnn/cnn_seal.cpp.s:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/cnn/cnn_seal.cpp.s
+.PHONY : cpu-ckks/single-key/cnn/cnn_seal.cpp.s
+
+cpu-ckks/single-key/cnn/infer_seal.o: cpu-ckks/single-key/cnn/infer_seal.cpp.o
+
+.PHONY : cpu-ckks/single-key/cnn/infer_seal.o
+
+# target to build an object file
+cpu-ckks/single-key/cnn/infer_seal.cpp.o:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/cnn/infer_seal.cpp.o
+.PHONY : cpu-ckks/single-key/cnn/infer_seal.cpp.o
+
+cpu-ckks/single-key/cnn/infer_seal.i: cpu-ckks/single-key/cnn/infer_seal.cpp.i
+
+.PHONY : cpu-ckks/single-key/cnn/infer_seal.i
+
+# target to preprocess a source file
+cpu-ckks/single-key/cnn/infer_seal.cpp.i:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/cnn/infer_seal.cpp.i
+.PHONY : cpu-ckks/single-key/cnn/infer_seal.cpp.i
+
+cpu-ckks/single-key/cnn/infer_seal.s: cpu-ckks/single-key/cnn/infer_seal.cpp.s
+
+.PHONY : cpu-ckks/single-key/cnn/infer_seal.s
+
+# target to generate assembly for a file
+cpu-ckks/single-key/cnn/infer_seal.cpp.s:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/cnn/infer_seal.cpp.s
+.PHONY : cpu-ckks/single-key/cnn/infer_seal.cpp.s
 
 cpu-ckks/single-key/comp/SEALcomp.o: cpu-ckks/single-key/comp/SEALcomp.cpp.o
 
@@ -372,7 +426,7 @@ cpu-ckks/single-key/comp/SEALcomp.o: cpu-ckks/single-key/comp/SEALcomp.cpp.o
 
 # target to build an object file
 cpu-ckks/single-key/comp/SEALcomp.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/cpu-ckks/single-key/comp/SEALcomp.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/comp/SEALcomp.cpp.o
 .PHONY : cpu-ckks/single-key/comp/SEALcomp.cpp.o
 
 cpu-ckks/single-key/comp/SEALcomp.i: cpu-ckks/single-key/comp/SEALcomp.cpp.i
@@ -381,7 +435,7 @@ cpu-ckks/single-key/comp/SEALcomp.i: cpu-ckks/single-key/comp/SEALcomp.cpp.i
 
 # target to preprocess a source file
 cpu-ckks/single-key/comp/SEALcomp.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/cpu-ckks/single-key/comp/SEALcomp.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/comp/SEALcomp.cpp.i
 .PHONY : cpu-ckks/single-key/comp/SEALcomp.cpp.i
 
 cpu-ckks/single-key/comp/SEALcomp.s: cpu-ckks/single-key/comp/SEALcomp.cpp.s
@@ -390,7 +444,7 @@ cpu-ckks/single-key/comp/SEALcomp.s: cpu-ckks/single-key/comp/SEALcomp.cpp.s
 
 # target to generate assembly for a file
 cpu-ckks/single-key/comp/SEALcomp.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/cpu-ckks/single-key/comp/SEALcomp.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/comp/SEALcomp.cpp.s
 .PHONY : cpu-ckks/single-key/comp/SEALcomp.cpp.s
 
 cpu-ckks/single-key/comp/SEALfunc.o: cpu-ckks/single-key/comp/SEALfunc.cpp.o
@@ -399,7 +453,7 @@ cpu-ckks/single-key/comp/SEALfunc.o: cpu-ckks/single-key/comp/SEALfunc.cpp.o
 
 # target to build an object file
 cpu-ckks/single-key/comp/SEALfunc.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/cpu-ckks/single-key/comp/SEALfunc.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/comp/SEALfunc.cpp.o
 .PHONY : cpu-ckks/single-key/comp/SEALfunc.cpp.o
 
 cpu-ckks/single-key/comp/SEALfunc.i: cpu-ckks/single-key/comp/SEALfunc.cpp.i
@@ -408,7 +462,7 @@ cpu-ckks/single-key/comp/SEALfunc.i: cpu-ckks/single-key/comp/SEALfunc.cpp.i
 
 # target to preprocess a source file
 cpu-ckks/single-key/comp/SEALfunc.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/cpu-ckks/single-key/comp/SEALfunc.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/comp/SEALfunc.cpp.i
 .PHONY : cpu-ckks/single-key/comp/SEALfunc.cpp.i
 
 cpu-ckks/single-key/comp/SEALfunc.s: cpu-ckks/single-key/comp/SEALfunc.cpp.s
@@ -417,7 +471,7 @@ cpu-ckks/single-key/comp/SEALfunc.s: cpu-ckks/single-key/comp/SEALfunc.cpp.s
 
 # target to generate assembly for a file
 cpu-ckks/single-key/comp/SEALfunc.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/cpu-ckks/single-key/comp/SEALfunc.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/comp/SEALfunc.cpp.s
 .PHONY : cpu-ckks/single-key/comp/SEALfunc.cpp.s
 
 cpu-ckks/single-key/comp/program.o: cpu-ckks/single-key/comp/program.cpp.o
@@ -426,7 +480,7 @@ cpu-ckks/single-key/comp/program.o: cpu-ckks/single-key/comp/program.cpp.o
 
 # target to build an object file
 cpu-ckks/single-key/comp/program.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/cpu-ckks/single-key/comp/program.cpp.o
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/comp/program.cpp.o
 .PHONY : cpu-ckks/single-key/comp/program.cpp.o
 
 cpu-ckks/single-key/comp/program.i: cpu-ckks/single-key/comp/program.cpp.i
@@ -435,7 +489,7 @@ cpu-ckks/single-key/comp/program.i: cpu-ckks/single-key/comp/program.cpp.i
 
 # target to preprocess a source file
 cpu-ckks/single-key/comp/program.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/cpu-ckks/single-key/comp/program.cpp.i
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/comp/program.cpp.i
 .PHONY : cpu-ckks/single-key/comp/program.cpp.i
 
 cpu-ckks/single-key/comp/program.s: cpu-ckks/single-key/comp/program.cpp.s
@@ -444,35 +498,35 @@ cpu-ckks/single-key/comp/program.s: cpu-ckks/single-key/comp/program.cpp.s
 
 # target to generate assembly for a file
 cpu-ckks/single-key/comp/program.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/cpu-ckks/single-key/comp/program.cpp.s
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/cpu-ckks/single-key/comp/program.cpp.s
 .PHONY : cpu-ckks/single-key/comp/program.cpp.s
 
-run/run_compare.o: run/run_compare.cpp.o
+run/run_cnn.o: run/run_cnn.cpp.o
 
-.PHONY : run/run_compare.o
+.PHONY : run/run_cnn.o
 
 # target to build an object file
-run/run_compare.cpp.o:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/run/run_compare.cpp.o
-.PHONY : run/run_compare.cpp.o
+run/run_cnn.cpp.o:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/run/run_cnn.cpp.o
+.PHONY : run/run_cnn.cpp.o
 
-run/run_compare.i: run/run_compare.cpp.i
+run/run_cnn.i: run/run_cnn.cpp.i
 
-.PHONY : run/run_compare.i
+.PHONY : run/run_cnn.i
 
 # target to preprocess a source file
-run/run_compare.cpp.i:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/run/run_compare.cpp.i
-.PHONY : run/run_compare.cpp.i
+run/run_cnn.cpp.i:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/run/run_cnn.cpp.i
+.PHONY : run/run_cnn.cpp.i
 
-run/run_compare.s: run/run_compare.cpp.s
+run/run_cnn.s: run/run_cnn.cpp.s
 
-.PHONY : run/run_compare.s
+.PHONY : run/run_cnn.s
 
 # target to generate assembly for a file
-run/run_compare.cpp.s:
-	$(MAKE) -f CMakeFiles/compare.dir/build.make CMakeFiles/compare.dir/run/run_compare.cpp.s
-.PHONY : run/run_compare.cpp.s
+run/run_cnn.cpp.s:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/run/run_cnn.cpp.s
+.PHONY : run/run_cnn.cpp.s
 
 # Help Target
 help:
@@ -480,9 +534,9 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... compare"
+	@echo "... rebuild_cache"
+	@echo "... cnn"
 	@echo "... common/Choosemax.o"
 	@echo "... common/Choosemax.i"
 	@echo "... common/Choosemax.s"
@@ -510,6 +564,12 @@ help:
 	@echo "... common/func.o"
 	@echo "... common/func.i"
 	@echo "... common/func.s"
+	@echo "... cpu-ckks/single-key/cnn/cnn_seal.o"
+	@echo "... cpu-ckks/single-key/cnn/cnn_seal.i"
+	@echo "... cpu-ckks/single-key/cnn/cnn_seal.s"
+	@echo "... cpu-ckks/single-key/cnn/infer_seal.o"
+	@echo "... cpu-ckks/single-key/cnn/infer_seal.i"
+	@echo "... cpu-ckks/single-key/cnn/infer_seal.s"
 	@echo "... cpu-ckks/single-key/comp/SEALcomp.o"
 	@echo "... cpu-ckks/single-key/comp/SEALcomp.i"
 	@echo "... cpu-ckks/single-key/comp/SEALcomp.s"
@@ -519,9 +579,9 @@ help:
 	@echo "... cpu-ckks/single-key/comp/program.o"
 	@echo "... cpu-ckks/single-key/comp/program.i"
 	@echo "... cpu-ckks/single-key/comp/program.s"
-	@echo "... run/run_compare.o"
-	@echo "... run/run_compare.i"
-	@echo "... run/run_compare.s"
+	@echo "... run/run_cnn.o"
+	@echo "... run/run_cnn.i"
+	@echo "... run/run_cnn.s"
 .PHONY : help
 
 

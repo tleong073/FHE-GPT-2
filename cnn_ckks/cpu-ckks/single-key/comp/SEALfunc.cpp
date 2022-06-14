@@ -114,7 +114,7 @@ namespace seal{
 			// i: depth stage
 			for(int i=1; i<= total_depth; i++)
 			{
-				cout << "////////////// stage : " << i << endl;
+				// cout << "////////////// stage : " << i << endl;
 
 				// depth i computation. all end points. 
 				for(int j=1; j<pow2(tree.depth+1); j++)
@@ -122,7 +122,7 @@ namespace seal{
 					if(tree.tree[j] == 0 && total_depth + 1 - num_one(j) == i) 	// depth i stage end points. j: index
 					{
 						int temp_idx = start_index[j];
-						cout << "pt: " << j << endl;
+						// cout << "pt: " << j << endl;
 						pt[j] = std::make_unique<Ciphertext>();
 						evaluator.multiply_const(*T[1], decomp_coeff[temp_idx], *pt[j]);
 						temp_idx += 2;
@@ -135,7 +135,7 @@ namespace seal{
 						}
 						evaluator.rescale_to_next_inplace(*pt[j]);
 						// print_cipher(decryptor, encoder, public_key, secret_key, relin_keys, *pt[j]);
-						decrypt_and_print_part(*pt[j], decryptor, encoder, n, 0, 5);
+						// decrypt_and_print_part(*pt[j], decryptor, encoder, n, 0, 5);
 					}
 				}	
 
@@ -148,7 +148,7 @@ namespace seal{
 					if(tree.tree[j] > 0 && total_depth + 1 - num_one(j) == i && j%2 == 1) 	// depth i stage intersection points
 					{
 						long k = j;	
-						cout << "pt: " << j << endl;
+						// cout << "pt: " << j << endl;
 						pt[j] = std::make_unique<Ciphertext>();
 						evaluator.multiply_reduced_error(*T[tree.tree[k]], *pt[2*k+1], relin_keys, *pt[j]);
 						k*=2;
@@ -162,35 +162,29 @@ namespace seal{
 						evaluator.rescale_to_next_inplace(*pt[j]);
 						evaluator.add_inplace_reduced_error(*pt[j], *pt[k]);
 						// print_cipher(decryptor, encoder, public_key, secret_key, relin_keys, *pt[j]);
-						decrypt_and_print_part(*pt[j], decryptor, encoder, n, 0, 5);
+						// decrypt_and_print_part(*pt[j], decryptor, encoder, n, 0, 5);
 					}
 				}
 
 				// Ti evaluation
 				if(i<=tree.m-1) 
 				{
-					cout << "T: " << pow2(i) << endl;
+					// cout << "T: " << pow2(i) << endl;
 					T[pow2(i)] = std::make_unique<Ciphertext>();
-					//////////////// for debugging
-					cout << "evalT test" << endl;
 					evalT(evaluator, public_key, secret_key, relin_keys, *T[pow2(i)], *T[pow2(i-1)], *T[pow2(i-1)], *T[0]);
 					// print_cipher(decryptor, encoder, public_key, secret_key, relin_keys, *T[pow2(i)]);
-					decrypt_and_print_part(*T[pow2(i)], decryptor, encoder, n, 0, 5);
+					// decrypt_and_print_part(*T[pow2(i)], decryptor, encoder, n, 0, 5);
 				}
 				
 				if(i<=tree.l)
 				{
 					for(int j=pow2(i-1)+1; j<=pow2(i)-1; j+=2)		// T1 is not computed. other odd Tis are computed.
 					{
-						cout << "T: " << j << endl;
+						// cout << "T: " << j << endl;
 						T[j] = std::make_unique<Ciphertext>();
-						cout << pow2(i-1) << endl;
-						//////////////// for debugging
-						cout << "evalT test" << endl;
 						evalT(evaluator, public_key, secret_key, relin_keys, *T[j], *T[pow2(i-1)], *T[j-pow2(i-1)], *T[pow2(i)-j]);
 						// print_cipher(decryptor, encoder, public_key, secret_key, relin_keys, *T[j]);
-						decrypt_and_print_part(*T[j], decryptor, encoder, n, 0, 5);
-						
+						// decrypt_and_print_part(*T[j], decryptor, encoder, n, 0, 5);
 					}
 				}
 
