@@ -150,6 +150,12 @@ namespace seal
             destination = create_galois_keys(galois_elts, false);
         }
 
+        // hoisting version
+        inline void create_hoisted_galois_keys(const std::vector<std::uint32_t> &galois_elts, const std::vector<std::uint32_t> &inv_galois_elts, GaloisKeys &destination)
+        {
+            destination = create_hoisted_galois_keys(galois_elts, inv_galois_elts, false);
+        }
+
         /**
         Generates and returns Galois keys as a serializable object. Every time
         this function is called, new Galois keys will be generated.
@@ -207,6 +213,16 @@ namespace seal
         inline void create_galois_keys(const std::vector<int> &steps, GaloisKeys &destination)
         {
             create_galois_keys(context_.key_context_data()->galois_tool()->get_elts_from_steps(steps), destination);
+        }
+
+        // hoisting version
+        inline void create_hoisted_galois_keys(const std::vector<int> &steps, GaloisKeys &destination) {
+            std::vector<int> inv_steps{};
+            for (auto step : steps) {
+                inv_steps.emplace_back(-step);
+            }
+
+            create_hoisted_galois_keys(context_.key_context_data()->galois_tool()->get_elts_from_steps(steps), context_.key_context_data()->galois_tool()->get_elts_from_steps(inv_steps), destination);
         }
 
         /**
@@ -352,6 +368,16 @@ namespace seal
         @throws std::invalid_argument if the Galois elements are not valid
         */
         GaloisKeys create_galois_keys(const std::vector<std::uint32_t> &galois_elts, bool save_seed);
+
+    	// hoisting version
+        void generate_hoisted_kswitch_keys(
+                util::ConstPolyIter inverse_new_keys, std::size_t num_keys, KSwitchKeys &destination, bool save_seed = false);
+
+        void generate_one_hoisted_kswitch_key(
+                util::ConstRNSIter inverse_new_key, std::vector<PublicKey> &destination, bool save_seed = false);
+
+        GaloisKeys create_hoisted_galois_keys(const std::vector<std::uint32_t> &galois_elts, const std::vector<std::uint32_t> &inv_galois_elts, bool save_seed);
+
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::mm_force_new, true);

@@ -276,7 +276,8 @@ namespace boot
 				// evaluator.multiply_const_scaleinv(cipher, to_double(coeff[1]), rtn);
 				evaluator.multiply_const(cipher, to_double(coeff[1]), rtn);
                 evaluator.rescale_to_next_inplace(rtn);
-				evaluator.add(rtn, squared, rtn);
+				// evaluator.add(rtn, squared, rtn);
+				evaluator.add_reduced_error(rtn, squared, rtn);
 			}
 
 			else rtn = squared;
@@ -301,7 +302,7 @@ namespace boot
 				// evaluator.multiply_const_scaleinv(cipher, to_double(coeff[1]), rtn);
 				evaluator.multiply_const(cipher, to_double(coeff[1]), rtn);
                 evaluator.rescale_to_next_inplace(rtn);
-				evaluator.add(rtn, cubic, rtn);
+				evaluator.add_reduced_error(rtn, cubic, rtn);
 			}
 
 			else rtn = cubic;
@@ -310,7 +311,7 @@ namespace boot
 				// evaluator.multiply_const_inplace_scaleinv(squared, to_double(coeff[2]));
 				evaluator.multiply_const_inplace(squared, to_double(coeff[2]));
                 evaluator.rescale_to_next_inplace(squared);
-				evaluator.add(rtn, squared, rtn);
+				evaluator.add_reduced_error(rtn, squared, rtn);
 			}
 
 			evaluator.add_const_inplace(rtn, to_double(coeff[0]));
@@ -360,7 +361,7 @@ namespace boot
                     evaluator.rescale_to_next_inplace(baby[i]);
 					evaluator.double_inplace(baby[i]);
 					
-					evaluator.sub(baby[i], baby[diff], baby[i]);
+					evaluator.sub_reduced_error(baby[i], baby[diff], baby[i]);
                     babybool[i] = true;
 				}
 			}
@@ -391,7 +392,7 @@ namespace boot
 				evaluator.multiply_reduced_error(baby[lpow2], baby[res], relin_keys, giant[0]);
                 evaluator.rescale_to_next_inplace(giant[0]);
 				evaluator.double_inplace(giant[0]);
-				evaluator.sub(giant[0], baby[diff], giant[0]);
+				evaluator.sub_reduced_error(giant[0], baby[diff], giant[0]);
 			}
 
 			// if(heap_k%4 == 0){
@@ -456,7 +457,7 @@ namespace boot
                             evaluator.rescale_to_next_inplace(tmp);
 						}
 				
-						evaluator.add(cipherheap[i], tmp, cipherheap[i]);
+						evaluator.add_reduced_error(cipherheap[i], tmp, cipherheap[i]);
 					}
 				}
 			}
@@ -478,7 +479,7 @@ namespace boot
 							// evaluator.multiply_scaleinv(cipherheap[2 * (i + 1) - 1], giant[gindex], cipherheap[i]);
 							evaluator.multiply_reduced_error(cipherheap[2 * (i + 1) - 1], giant[gindex], relin_keys, cipherheap[i]);
                             evaluator.rescale_to_next_inplace(cipherheap[i]);
-							evaluator.add(cipherheap[i], cipherheap[2 * (i + 1)], cipherheap[i]);
+							evaluator.add_reduced_error(cipherheap[i], cipherheap[2 * (i + 1)], cipherheap[i]);
 						}
 
 					}

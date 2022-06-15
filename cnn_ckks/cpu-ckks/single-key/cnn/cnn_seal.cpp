@@ -173,34 +173,34 @@ void approx_ReLU_seal_print(const TensorCipher &cnn_in, TensorCipher &cnn_out, l
 	output << "intermediate decrypted values: " << endl;
 	decrypt_and_print_txt(cnn_out.cipher(), decryptor, encoder, 1<<logn, 4, 1, output); // cnn_out.print_parms();
 }
-// void bootstrap_print(const TensorCipher &cnn_in, TensorCipher &cnn_out, Bootstrapper &bootstrapper, ofstream &output, Decryptor &decryptor, CKKSEncoder &encoder, SEALContext &context, size_t stage)
-// {
-//     cout << "bootstrapping..." << endl;
-//     output << "bootstrapping..." << endl;
-// 	Ciphertext ctxt, rtn;
-// 	int logn = cnn_in.logn();
-// 	chrono::high_resolution_clock::time_point time_start, time_end;
-// 	chrono::microseconds time_diff;
+void bootstrap_print(const TensorCipher &cnn_in, TensorCipher &cnn_out, Bootstrapper &bootstrapper, ofstream &output, Decryptor &decryptor, CKKSEncoder &encoder, SEALContext &context, size_t stage)
+{
+    cout << "bootstrapping..." << endl;
+    output << "bootstrapping..." << endl;
+	Ciphertext ctxt, rtn;
+	int logn = cnn_in.logn();
+	chrono::high_resolution_clock::time_point time_start, time_end;
+	chrono::microseconds time_diff;
 
-// 	ctxt = cnn_in.cipher();
-// 	time_start = chrono::high_resolution_clock::now();
-// 	// bootstrapper.bootstrap_3(rtn, ctxt);
-// 	bootstrapper.bootstrap_real_3(rtn, ctxt);
-// 	time_end = chrono::high_resolution_clock::now();
-// 	time_diff = chrono::duration_cast<chrono::milliseconds>(time_end - time_start);
-// 	cout << "time : " << time_diff.count() / 1000 << " ms" << endl;
-// 	output << "time : " << time_diff.count() / 1000 << " ms" << endl;
-// 	cnn_out.set_ciphertext(rtn);
-//     cout << "bootstrapping " << stage << " result" << endl;
-//     output << "bootstrapping " << stage << " result" << endl;
-// 	// decrypt_and_print(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2); cnn_out.print_parms();
-//     // decrypt_and_print_txt(cnn_out.cipher(), decryptor, encoder, 1<<logn, 4, 1, output); cnn_out.print_parms();
-// 	cout << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl;
-// 	cout << "scale: " << cnn_out.cipher().scale() << endl << endl;
-// 	output << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl;
-// 	output << "scale: " << cnn_out.cipher().scale() << endl << endl;
+	ctxt = cnn_in.cipher();
+	time_start = chrono::high_resolution_clock::now();
+	// bootstrapper.bootstrap_3(rtn, ctxt);
+	bootstrapper.bootstrap_real_3(rtn, ctxt);
+	time_end = chrono::high_resolution_clock::now();
+	time_diff = chrono::duration_cast<chrono::milliseconds>(time_end - time_start);
+	cout << "time : " << time_diff.count() / 1000 << " ms" << endl;
+	output << "time : " << time_diff.count() / 1000 << " ms" << endl;
+	cnn_out.set_ciphertext(rtn);
+    cout << "bootstrapping " << stage << " result" << endl;
+    output << "bootstrapping " << stage << " result" << endl;
+	// decrypt_and_print(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2); cnn_out.print_parms();
+    // decrypt_and_print_txt(cnn_out.cipher(), decryptor, encoder, 1<<logn, 4, 1, output); cnn_out.print_parms();
+	cout << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl;
+	cout << "scale: " << cnn_out.cipher().scale() << endl << endl;
+	output << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl;
+	output << "scale: " << cnn_out.cipher().scale() << endl << endl;
 
-// }
+}
 void cipher_add_seal_print(const TensorCipher &cnn1, const TensorCipher &cnn2, TensorCipher &destination, Evaluator &evaluator, ofstream &output, Decryptor &decryptor, CKKSEncoder &encoder, SEALContext &context)
 {
     cout << "cipher add..." << endl;

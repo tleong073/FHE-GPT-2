@@ -5,7 +5,7 @@
 #include "func.h"
 #include "PolyUpdate.h"
 #include "program.h"
-// #include "Bootstrapper.h"
+#include "Bootstrapper.h"
 #include "cnn_seal.h"
 #include <omp.h>
 #include <NTL/RR.h>

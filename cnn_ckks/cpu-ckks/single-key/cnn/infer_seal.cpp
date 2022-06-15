@@ -336,9 +336,9 @@ void ResNet_cifar10_seal_sparse(size_t layer_num, size_t start_image_id, size_t 
 	Decryptor decryptor(context, secret_key);
 	// ScaleInvEvaluator scale_evaluator(context, encoder, relin_keys);
 
-// 	Bootstrapper bootstrapper_1(loge, logn_1, logN - 1, total_level, scale, boundary_K, boot_deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, scale_evaluator, relin_keys, gal_keys);
-// 	Bootstrapper bootstrapper_2(loge, logn_2, logN - 1, total_level, scale, boundary_K, boot_deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, scale_evaluator, relin_keys, gal_keys);
-// 	Bootstrapper bootstrapper_3(loge, logn_3, logN - 1, total_level, scale, boundary_K, boot_deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, scale_evaluator, relin_keys, gal_keys);
+	Bootstrapper bootstrapper_1(loge, logn_1, logN - 1, total_level, scale, boundary_K, boot_deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, evaluator, relin_keys, gal_keys);
+	Bootstrapper bootstrapper_2(loge, logn_2, logN - 1, total_level, scale, boundary_K, boot_deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, evaluator, relin_keys, gal_keys);
+	Bootstrapper bootstrapper_3(loge, logn_3, logN - 1, total_level, scale, boundary_K, boot_deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, evaluator, relin_keys, gal_keys);
 
 //	additional rotation kinds for CNN
 	vector<int> rotation_kinds = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33
@@ -358,11 +358,11 @@ void ResNet_cifar10_seal_sparse(size_t layer_num, size_t start_image_id, size_t 
 		,32736,32737,32759,32760,32761,32762,32763,32764,32765,32766,32767
 	};
 
-// 	// bootstrapping preprocessing
-// 	cout << "Generating Optimal Minimax Polynomials..." << endl;
-// 	bootstrapper_1.prepare_mod_polynomial();
-// 	bootstrapper_2.prepare_mod_polynomial();
-// 	bootstrapper_3.prepare_mod_polynomial();
+	// bootstrapping preprocessing
+	cout << "Generating Optimal Minimax Polynomials..." << endl;
+	bootstrapper_1.prepare_mod_polynomial();
+	bootstrapper_2.prepare_mod_polynomial();
+	bootstrapper_3.prepare_mod_polynomial();
 
 	cout << "Adding Bootstrapping Keys..." << endl;
 	vector<int> gal_steps_vector;
@@ -372,19 +372,19 @@ void ResNet_cifar10_seal_sparse(size_t layer_num, size_t start_image_id, size_t 
 	{
 		if(find(gal_steps_vector.begin(), gal_steps_vector.end(), rot) == gal_steps_vector.end()) gal_steps_vector.push_back(rot);
 	} 
-	// bootstrapper_1.addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
-	// bootstrapper_2.addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
-	// bootstrapper_3.addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
+	bootstrapper_1.addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
+	bootstrapper_2.addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
+	bootstrapper_3.addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
 	keygen.create_galois_keys(gal_steps_vector, gal_keys);
 
-// 	bootstrapper_1.slot_vec.push_back(logn_1);
-// 	bootstrapper_2.slot_vec.push_back(logn_2);
-// 	bootstrapper_3.slot_vec.push_back(logn_3);
+	bootstrapper_1.slot_vec.push_back(logn_1);
+	bootstrapper_2.slot_vec.push_back(logn_2);
+	bootstrapper_3.slot_vec.push_back(logn_3);
 
-// 	cout << "Generating Linear Transformation Coefficients..." << endl;
-// 	bootstrapper_1.generate_LT_coefficient_3();
-// 	bootstrapper_2.generate_LT_coefficient_3();
-// 	bootstrapper_3.generate_LT_coefficient_3();
+	cout << "Generating Linear Transformation Coefficients..." << endl;
+	bootstrapper_1.generate_LT_coefficient_3();
+	bootstrapper_2.generate_LT_coefficient_3();
+	bootstrapper_3.generate_LT_coefficient_3();
 
 	// time setting
 	chrono::high_resolution_clock::time_point all_time_start, all_time_end;
@@ -490,6 +490,13 @@ void ResNet_cifar10_seal_sparse(size_t layer_num, size_t start_image_id, size_t 
 
 			for(int k=0; k<=end_num; k++)	// 0 ~ 2/4/6/8/17
 			{
+				// // sparse slot modification
+				// size_t sparse_slots = 1024;
+				// if(j==0) sparse_slots = 32768;
+				// else if(j==1) sparse_slots = 16384;
+				// else if(j==2) sparse_slots = 8192;
+  				// parms.set_sparse_slots(sparse_slots);
+
 				stage = 2*((end_num+1)*j+k)+1;
 				cout << "layer " << stage << endl;
 				output << "layer " << stage << endl;
@@ -498,9 +505,9 @@ void ResNet_cifar10_seal_sparse(size_t layer_num, size_t start_image_id, size_t 
 				else st = 1;
 				multiplexed_parallel_convolution_print(cnn, cnn, co, st, fh, fw, conv_weight[stage], bn_running_var[stage], bn_weight[stage], epsilon, encoder, encryptor, evaluator, gal_keys, cipher_pool, output, decryptor, context, stage);
 				multiplexed_parallel_batch_norm_seal_print(cnn, cnn, bn_bias[stage], bn_running_mean[stage], bn_running_var[stage], bn_weight[stage], epsilon, encoder, encryptor, evaluator, B, output, decryptor, context, stage);
-				// if(j==0) bootstrap_print(cnn, cnn, bootstrapper_1, output, decryptor, encoder, context, stage);
-				// else if(j==1) bootstrap_print(cnn, cnn, bootstrapper_2, output, decryptor, encoder, context, stage);
-				// else if(j==2) bootstrap_print(cnn, cnn, bootstrapper_3, output, decryptor, encoder, context, stage);
+				if(j==0) bootstrap_print(cnn, cnn, bootstrapper_1, output, decryptor, encoder, context, stage);
+				else if(j==1) bootstrap_print(cnn, cnn, bootstrapper_2, output, decryptor, encoder, context, stage);
+				else if(j==2) bootstrap_print(cnn, cnn, bootstrapper_3, output, decryptor, encoder, context, stage);
 				approx_ReLU_seal_print(cnn, cnn, comp_no, deg, alpha, tree, scaled_val, logp, encryptor, evaluator, decryptor, encoder, public_key, secret_key, relin_keys, B, output, context, gal_keys, stage);
 
 				stage = 2*((end_num+1)*j+k)+2;
@@ -512,9 +519,9 @@ void ResNet_cifar10_seal_sparse(size_t layer_num, size_t start_image_id, size_t 
 				multiplexed_parallel_batch_norm_seal_print(cnn, cnn, bn_bias[stage], bn_running_mean[stage], bn_running_var[stage], bn_weight[stage], epsilon, encoder, encryptor, evaluator, B, output, decryptor, context, stage);
 				if(j>=1 && k==0) multiplexed_parallel_downsampling_seal_print(temp, temp, evaluator, gal_keys, output);
 				cipher_add_seal_print(temp, cnn, cnn, evaluator, output, decryptor, encoder, context);
-				// if(j==0) bootstrap_print(cnn, cnn, bootstrapper_1, output, decryptor, encoder, context, stage);
-				// else if(j==1) bootstrap_print(cnn, cnn, bootstrapper_2, output, decryptor, encoder, context, stage);
-				// else if(j==2) bootstrap_print(cnn, cnn, bootstrapper_3, output, decryptor, encoder, context, stage);
+				if(j==0) bootstrap_print(cnn, cnn, bootstrapper_1, output, decryptor, encoder, context, stage);
+				else if(j==1) bootstrap_print(cnn, cnn, bootstrapper_2, output, decryptor, encoder, context, stage);
+				else if(j==2) bootstrap_print(cnn, cnn, bootstrapper_3, output, decryptor, encoder, context, stage);
 				approx_ReLU_seal_print(cnn, cnn, comp_no, deg, alpha, tree, scaled_val, logp, encryptor, evaluator, decryptor, encoder, public_key, secret_key, relin_keys, B, output, context, gal_keys, stage);		
 			}
 		}

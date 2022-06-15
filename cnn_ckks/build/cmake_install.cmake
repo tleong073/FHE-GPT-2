@@ -44,12 +44,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/eslee3209/FHE-MP-CNN/cnn_ckks/build/cpu-ckks/single-key/cnn/cmake_install.cmake")
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for the subdirectory.
-  include("/home/eslee3209/FHE-MP-CNN/cnn_ckks/build/cpu-ckks/single-key/comp/cmake_install.cmake")
+  include("/home/eslee3209/FHE-MP-CNN/cnn_ckks/build/cpu-ckks/single-key/ckks_bootstrapping/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
