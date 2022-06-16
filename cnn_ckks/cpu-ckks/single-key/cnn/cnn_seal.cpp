@@ -163,7 +163,8 @@ void approx_ReLU_seal_print(const TensorCipher &cnn_in, TensorCipher &cnn_out, l
 	// cout << "ReLU function " << stage << " result" << endl;
 	output << "time : " << time_diff.count() / 1000 << " ms" << endl;
 	// output << "ReLU function " << stage << " result" << endl;
-	// decrypt_and_print(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2); cnn_out.print_parms();
+	decrypt_and_print(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2); cnn_out.print_parms();
+	// decrypt_and_print_txt(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2, output); cnn_out.print_parms();
 	cout << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl; 
 	cout << "scale: " << cnn_out.cipher().scale() << endl << endl;
 	output << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl;
@@ -193,8 +194,8 @@ void bootstrap_print(const TensorCipher &cnn_in, TensorCipher &cnn_out, Bootstra
 	cnn_out.set_ciphertext(rtn);
     cout << "bootstrapping " << stage << " result" << endl;
     output << "bootstrapping " << stage << " result" << endl;
-	// decrypt_and_print(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2); cnn_out.print_parms();
-    // decrypt_and_print_txt(cnn_out.cipher(), decryptor, encoder, 1<<logn, 4, 1, output); cnn_out.print_parms();
+	decrypt_and_print(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2); cnn_out.print_parms();
+	// decrypt_and_print_txt(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2, output); cnn_out.print_parms();
 	cout << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl;
 	cout << "scale: " << cnn_out.cipher().scale() << endl << endl;
 	output << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl;
@@ -208,14 +209,14 @@ void cipher_add_seal_print(const TensorCipher &cnn1, const TensorCipher &cnn2, T
 	int logn = cnn1.logn();
 	cnn_add_seal(cnn1, cnn2, destination, evaluator);
 	// cout << "cipher add result" << endl;
-	// decrypt_and_print(destination.cipher(), decryptor, encoder, 1<<logn, 256, 2); destination.print_parms();
-	// decrypt_and_print_txt(destination.cipher(), decryptor, encoder, 1<<logn, 256, 2, output); destination.print_parms();
+	decrypt_and_print(destination.cipher(), decryptor, encoder, 1<<logn, 256, 2); destination.print_parms();
+	// decrypt_and_print_txt(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2, output); cnn_out.print_parms();
 	cout << "remaining level : " << context.get_context_data(destination.cipher().parms_id())->chain_index() << endl;
 	cout << "scale: " << destination.cipher().scale() << endl << endl;
 	output << "remaining level : " << context.get_context_data(destination.cipher().parms_id())->chain_index() << endl;
 	output << "scale: " << destination.cipher().scale() << endl << endl;
 }
-void multiplexed_parallel_downsampling_seal_print(const TensorCipher &cnn_in, TensorCipher &cnn_out, Evaluator &evaluator, GaloisKeys &gal_keys, ofstream &output)
+void multiplexed_parallel_downsampling_seal_print(const TensorCipher &cnn_in, TensorCipher &cnn_out, Evaluator &evaluator, Decryptor &decryptor, CKKSEncoder &encoder, SEALContext &context, GaloisKeys &gal_keys, ofstream &output)
 {
     cout << "multiplexed parallel downsampling..." << endl;
     output << "multiplexed parallel downsampling..." << endl;
@@ -228,9 +229,13 @@ void multiplexed_parallel_downsampling_seal_print(const TensorCipher &cnn_in, Te
 	time_end = chrono::high_resolution_clock::now();
 	time_diff = chrono::duration_cast<chrono::milliseconds>(time_end - time_start);
 	cout << "time : " << time_diff.count() / 1000 << " ms" << endl;
-	// cout << "downsampling" << endl << endl;
 	output << "time : " << time_diff.count() / 1000 << " ms" << endl;
-	// output << "downsampling" << endl << endl;
+	decrypt_and_print(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2); cnn_out.print_parms();
+	// decrypt_and_print_txt(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2, output); cnn_out.print_parms();
+	cout << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl;
+	cout << "scale: " << cnn_out.cipher().scale() << endl << endl;
+	output << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl;
+	output << "scale: " << cnn_out.cipher().scale() << endl << endl;
 }
 void averagepooling_seal_scale_print(const TensorCipher &cnn_in, TensorCipher &cnn_out, Evaluator &evaluator, GaloisKeys &gal_keys, double B, ofstream &output, Decryptor &decryptor, CKKSEncoder &encoder, SEALContext &context)
 {
@@ -246,10 +251,8 @@ void averagepooling_seal_scale_print(const TensorCipher &cnn_in, TensorCipher &c
 	time_end = chrono::high_resolution_clock::now();
 	time_diff = chrono::duration_cast<chrono::milliseconds>(time_end - time_start);
 	cout << "time : " << time_diff.count() / 1000 << " ms" << endl;
-	// cout << "Average poolng result" << endl;
 	output << "time : " << time_diff.count() / 1000 << " ms" << endl;
-	// output << "Average poolng result" << endl;
-	// decrypt_and_print(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2); cnn_out.print_parms();
+	decrypt_and_print(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2); cnn_out.print_parms();
 	// decrypt_and_print_txt(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2, output); cnn_out.print_parms();
 	cout << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl; 
 	cout << "scale: " << cnn_out.cipher().scale() << endl << endl;
@@ -270,10 +273,8 @@ void fully_connected_seal_print(const TensorCipher &cnn_in, TensorCipher &cnn_ou
 	time_end = chrono::high_resolution_clock::now();
 	time_diff = chrono::duration_cast<chrono::milliseconds>(time_end - time_start);
 	cout << "time : " << time_diff.count() / 1000 << " ms" << endl;
-	// cout << "fully connected result" << endl;
 	output << "time : " << time_diff.count() / 1000 << " ms" << endl;
-	// output << "fully connected result" << endl;
-	// decrypt_and_print(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2); cnn_out.print_parms();
+	decrypt_and_print(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2); cnn_out.print_parms();
 	// decrypt_and_print_txt(cnn_out.cipher(), decryptor, encoder, 1<<logn, 256, 2, output); cnn_out.print_parms();
 	cout << "remaining level : " << context.get_context_data(cnn_out.cipher().parms_id())->chain_index() << endl; 
 	cout << "scale: " << cnn_out.cipher().scale() << endl << endl;
@@ -660,6 +661,7 @@ void multiplexed_parallel_downsampling_seal(const TensorCipher &cnn_in, TensorCi
 			
 		}
 	}
+	evaluator.rescale_to_next_inplace(sum);		// added
 	ct = sum;
 
 	// for fprime packing

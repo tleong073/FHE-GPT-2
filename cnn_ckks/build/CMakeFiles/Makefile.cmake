@@ -13,6 +13,8 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.16.3/CMakeSystem.cmake"
   "../common/CMakeLists.txt"
   "../cpu-ckks/single-key/ckks_bootstrapping/CMakeLists.txt"
+  "../cpu-ckks/single-key/cnn/CMakeLists.txt"
+  "../cpu-ckks/single-key/comp/CMakeLists.txt"
   "/usr/local/lib/cmake/SEAL-3.6/SEALConfig.cmake"
   "/usr/local/lib/cmake/SEAL-3.6/SEALConfigVersion.cmake"
   "/usr/local/lib/cmake/SEAL-3.6/SEALTargets-release.cmake"
@@ -128,10 +130,12 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/3.16.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   "common/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "cpu-ckks/single-key/cnn/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "cpu-ckks/single-key/comp/CMakeFiles/CMakeDirectoryInformation.cmake"
   "cpu-ckks/single-key/ckks_bootstrapping/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/bootstrapping.dir/DependInfo.cmake"
+  "CMakeFiles/cnn.dir/DependInfo.cmake"
   )

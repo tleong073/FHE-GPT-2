@@ -318,6 +318,7 @@ void ResNet_cifar10_seal_sparse(size_t layer_num, size_t start_image_id, size_t 
 	// added
 	size_t secret_key_hamming_weight = 192;
     parms.set_secret_key_hamming_weight(secret_key_hamming_weight);
+	// parms.set_sparse_slots(1 << logn_1);
 	double scale = pow(2.0, logp);
 
 	SEALContext context(parms);
@@ -488,15 +489,20 @@ void ResNet_cifar10_seal_sparse(size_t layer_num, size_t start_image_id, size_t 
 			else if(j==1) co = 32;
 			else if(j==2) co = 64;
 
+			// // sparse slot
+			// if(j==0) {
+			// 	parms.set_sparse_slots(1<<logn_1);
+			// 	encoder.set_sparse_slots(1<<logn_1);
+			// } else if(j==1) {
+			// 	parms.set_sparse_slots(1<<logn_2);
+			// 	encoder.set_sparse_slots(1<<logn_2);
+			// } else if(j==2) {
+			// 	parms.set_sparse_slots(1<<logn_3);
+			// 	encoder.set_sparse_slots(1<<logn_3);
+			// }
+
 			for(int k=0; k<=end_num; k++)	// 0 ~ 2/4/6/8/17
 			{
-				// // sparse slot modification
-				// size_t sparse_slots = 1024;
-				// if(j==0) sparse_slots = 32768;
-				// else if(j==1) sparse_slots = 16384;
-				// else if(j==2) sparse_slots = 8192;
-  				// parms.set_sparse_slots(sparse_slots);
-
 				stage = 2*((end_num+1)*j+k)+1;
 				cout << "layer " << stage << endl;
 				output << "layer " << stage << endl;
@@ -517,7 +523,7 @@ void ResNet_cifar10_seal_sparse(size_t layer_num, size_t start_image_id, size_t 
 
 				multiplexed_parallel_convolution_print(cnn, cnn, co, st, fh, fw, conv_weight[stage], bn_running_var[stage], bn_weight[stage], epsilon, encoder, encryptor, evaluator, gal_keys, cipher_pool, output, decryptor, context, stage);
 				multiplexed_parallel_batch_norm_seal_print(cnn, cnn, bn_bias[stage], bn_running_mean[stage], bn_running_var[stage], bn_weight[stage], epsilon, encoder, encryptor, evaluator, B, output, decryptor, context, stage);
-				if(j>=1 && k==0) multiplexed_parallel_downsampling_seal_print(temp, temp, evaluator, gal_keys, output);
+				if(j>=1 && k==0) multiplexed_parallel_downsampling_seal_print(temp, temp, evaluator, decryptor, encoder, context, gal_keys, output);
 				cipher_add_seal_print(temp, cnn, cnn, evaluator, output, decryptor, encoder, context);
 				if(j==0) bootstrap_print(cnn, cnn, bootstrapper_1, output, decryptor, encoder, context, stage);
 				else if(j==1) bootstrap_print(cnn, cnn, bootstrapper_2, output, decryptor, encoder, context, stage);

@@ -440,6 +440,15 @@ namespace seal
             return slots_;
         }
 
+		       /*
+        E.-S. Lee
+        */
+        inline void set_sparse_slots(std::size_t sparse_slots)
+        {
+            // Set the degree
+            sparse_slots_= sparse_slots;
+        }
+
     private:
         template <
             typename T, typename = std::enable_if_t<

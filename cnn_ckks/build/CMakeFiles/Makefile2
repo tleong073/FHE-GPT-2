@@ -53,21 +53,27 @@ CMAKE_BINARY_DIR = /home/eslee3209/FHE-MP-CNN/cnn_ckks/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/bootstrapping.dir/all
+all: CMakeFiles/cnn.dir/all
 all: common/all
+all: cpu-ckks/single-key/cnn/all
+all: cpu-ckks/single-key/comp/all
 all: cpu-ckks/single-key/ckks_bootstrapping/all
 
 .PHONY : all
 
 # The main recursive "preinstall" target.
 preinstall: common/preinstall
+preinstall: cpu-ckks/single-key/cnn/preinstall
+preinstall: cpu-ckks/single-key/comp/preinstall
 preinstall: cpu-ckks/single-key/ckks_bootstrapping/preinstall
 
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/bootstrapping.dir/clean
+clean: CMakeFiles/cnn.dir/clean
 clean: common/clean
+clean: cpu-ckks/single-key/cnn/clean
+clean: cpu-ckks/single-key/comp/clean
 clean: cpu-ckks/single-key/ckks_bootstrapping/clean
 
 .PHONY : clean
@@ -109,31 +115,67 @@ cpu-ckks/single-key/ckks_bootstrapping/clean:
 .PHONY : cpu-ckks/single-key/ckks_bootstrapping/clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/bootstrapping.dir
+# Directory level rules for directory cpu-ckks/single-key/cnn
+
+# Recursive "all" directory target.
+cpu-ckks/single-key/cnn/all:
+
+.PHONY : cpu-ckks/single-key/cnn/all
+
+# Recursive "preinstall" directory target.
+cpu-ckks/single-key/cnn/preinstall:
+
+.PHONY : cpu-ckks/single-key/cnn/preinstall
+
+# Recursive "clean" directory target.
+cpu-ckks/single-key/cnn/clean:
+
+.PHONY : cpu-ckks/single-key/cnn/clean
+
+#=============================================================================
+# Directory level rules for directory cpu-ckks/single-key/comp
+
+# Recursive "all" directory target.
+cpu-ckks/single-key/comp/all:
+
+.PHONY : cpu-ckks/single-key/comp/all
+
+# Recursive "preinstall" directory target.
+cpu-ckks/single-key/comp/preinstall:
+
+.PHONY : cpu-ckks/single-key/comp/preinstall
+
+# Recursive "clean" directory target.
+cpu-ckks/single-key/comp/clean:
+
+.PHONY : cpu-ckks/single-key/comp/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/cnn.dir
 
 # All Build rule for target.
-CMakeFiles/bootstrapping.dir/all:
-	$(MAKE) -f CMakeFiles/bootstrapping.dir/build.make CMakeFiles/bootstrapping.dir/depend
-	$(MAKE) -f CMakeFiles/bootstrapping.dir/build.make CMakeFiles/bootstrapping.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/eslee3209/FHE-MP-CNN/cnn_ckks/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13 "Built target bootstrapping"
-.PHONY : CMakeFiles/bootstrapping.dir/all
+CMakeFiles/cnn.dir/all:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/depend
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/eslee3209/FHE-MP-CNN/cnn_ckks/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 "Built target cnn"
+.PHONY : CMakeFiles/cnn.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/bootstrapping.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/eslee3209/FHE-MP-CNN/cnn_ckks/build/CMakeFiles 13
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/bootstrapping.dir/all
+CMakeFiles/cnn.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/eslee3209/FHE-MP-CNN/cnn_ckks/build/CMakeFiles 18
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/cnn.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/eslee3209/FHE-MP-CNN/cnn_ckks/build/CMakeFiles 0
-.PHONY : CMakeFiles/bootstrapping.dir/rule
+.PHONY : CMakeFiles/cnn.dir/rule
 
 # Convenience name for target.
-bootstrapping: CMakeFiles/bootstrapping.dir/rule
+cnn: CMakeFiles/cnn.dir/rule
 
-.PHONY : bootstrapping
+.PHONY : cnn
 
 # clean rule for target.
-CMakeFiles/bootstrapping.dir/clean:
-	$(MAKE) -f CMakeFiles/bootstrapping.dir/build.make CMakeFiles/bootstrapping.dir/clean
-.PHONY : CMakeFiles/bootstrapping.dir/clean
+CMakeFiles/cnn.dir/clean:
+	$(MAKE) -f CMakeFiles/cnn.dir/build.make CMakeFiles/cnn.dir/clean
+.PHONY : CMakeFiles/cnn.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
