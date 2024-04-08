@@ -1,0 +1,10 @@
+message(STATUS "include gpt2 directory")
+
+# Source files in this directory
+set(GPT2_SOURCE_FILES ${GPT_SOURCE_FILES}
+	${CMAKE_CURRENT_LIST_DIR}/matrix_mul.cpp
+	${CMAKE_CURRENT_LIST_DIR}/util.cpp
+)
+
+set(GPT2_SOURCE_FILES ${GPT2_SOURCE_FILES} PARENT_SCOPE)
+set(GPT2_HEADER_DIR ${CMAKE_CURRENT_LIST_DIR} PARENT_SCOPE)
