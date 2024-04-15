@@ -48,11 +48,11 @@ long logn = 15;		// full slots
 long logn_1 = 14;	// sparse slots
 long logn_2 = 13;
 long logn_3 = 12;
-int logp = 46;
+int logp = 51;
 int logq = 51;
 int log_special_prime = 51;
 int log_integer_part = logq - logp - loge + 5;
-int remaining_level = 5; // Calculation required
+int remaining_level = 9; // Calculation required
 int boot_level = 1; // 
 int total_level = remaining_level + boot_level;
 
@@ -60,7 +60,7 @@ int total_level = remaining_level + boot_level;
 
 TEST_SUITE("Init") {
 
-    TEST_CASE("Setup initializes correctly") {
+    TEST_CASE("InitNoCrash") {
 
         INIT();
 
@@ -115,7 +115,7 @@ TEST_SUITE("MatrixMul") {
         vector<double> v1 = {1.0,2.0,3.0};
         left_input_init.push_back(v1);
 
-        vector<double> v2 = {4.0,5.0,6.0};
+        vector<double> v2 = {4.0,5.0,6.0,4.0,5.0,6.0};
         right_input_init.push_back(v2);
 
         int rows = 1,cols = 3;
@@ -140,15 +140,25 @@ TEST_SUITE("MatrixMul") {
         vector<TensorCipher> outputs;
         vector<double> output_unencoded;
         vector<double> bias;
+        vector<vector<double>> expected;
+        expected.push_back({4.0,10.0,18.0});
+        expected.push_back({5.0,12.0,12.0});
+        expected.push_back({6.0,8.0,15.0});
+
 
         col_matrix_multiplication_seal(left_inputs, right_inputs, outputs, bias, rows, cols, config, 
             encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
         
-        decryptor.decrypt(outputs[0].cipher(),plain);
-        encoder.decode(plain, output_unencoded);
-        CHECK(doctest::Approx(output_unencoded[0]) == 4.0);
-        CHECK(doctest::Approx(output_unencoded[1]) == 10.0);
-        CHECK(doctest::Approx(output_unencoded[2]) == 18.0);
+        for(int i =0; i <cols; i++) {
+            decryptor.decrypt(outputs[i].cipher(),plain);
+            encoder.decode(plain, output_unencoded);
+            for(int j = 0;j<cols;j++) {
+                //printf("%d ",output_unen);
+                CHECK(doctest::Approx(output_unencoded[j]) == expected[i][j]);
+            }
+            //printf("\n");
+        }
+        
     }
 
     TEST_CASE("RowMatMul") {
@@ -213,6 +223,205 @@ TEST_SUITE("MatrixMul") {
                 CHECK(doctest::Approx(output_unencoded[j]) == expect[i][j]);
             }
             printf("\n");
+        }
+    }
+
+    TEST_CASE("DiagRowMat") {
+
+        INIT();
+        Plaintext plain;
+        Ciphertext cipher;
+
+        vector<vector<double>> inputs;
+        vector<TensorCipher> tmp_tcipher;
+        vector<vector<TensorCipher>> left_inputs;
+        vector<TensorCipher> inputs_encrypted;
+        TensorCipher tensor;
+        Config config;
+        
+        size_t slot_count = encoder.slot_count();
+        cout << "Number of slots: " << slot_count << endl;
+
+
+        vector<double> w1 = {1.0,2.0,3.0};
+        vector<double> w2 = {4.0,5.0,6.0};
+        vector<double> w3 = {7.0,8.0,9.0};
+        inputs.push_back(w1);
+        inputs.push_back(w2);
+        inputs.push_back(w3);
+
+        int rows = 3,cols = 3;
+        for(int i = 0; i < rows; i++){
+            encoder.encode(inputs[i], scale, plain);
+            encryptor.encrypt(plain, cipher);
+            tensor = TensorCipher(cipher);
+            inputs_encrypted.push_back(tensor);
+        }
+
+        printf("Setup Complete: \n");
+        vector<TensorCipher> outputs;
+        vector<double> output_unencoded;
+
+        diagonal_to_row_matrix_seal( inputs_encrypted,outputs, rows,  cols,config,
+	         encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
+        
+        vector<vector<double>> expect;
+        expect.push_back({1.0,4.0,7.0});
+        expect.push_back({2.0,5.0,8.0});
+        expect.push_back({3.0,6.0,9.0});
+
+        int idx;
+        printf("Decrypting\n");
+        for(int i = 0; i<rows;i++) {
+            decryptor.decrypt(outputs[i].cipher(),plain);
+            encoder.decode(plain, output_unencoded);
+            for(int j =0 ; j< cols;j++) {
+                CHECK(doctest::Approx(output_unencoded[j]) == expect[i][j]);
+            }
+        }
+    }
+}
+
+TEST_SUITE("PolyApprox") {
+
+    TEST_CASE("SignFunctionF") {
+
+        INIT();
+
+        Plaintext plain;
+        Ciphertext cipher_in,cipher_out;
+
+        vector<double> v = {-0.4000000,0.5000000000,1,-1};
+        encoder.encode(v, scale, plain);
+        encryptor.encrypt(plain,cipher_in);
+
+        compute_sign_f(cipher_in,cipher_out, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
+        
+        vector<double> v_expect = {-1.2224,1.722457886,7.5625,-7.5625};
+        vector<double> v_out;
+        decryptor.decrypt(cipher_out,plain);
+        encoder.decode(plain, v_out);
+        
+        for(int i = 0; i<4;i++) {
+             CHECK(doctest::Approx(v_out[i]) == v_expect[i]);
+        }
+    }
+
+    TEST_CASE("SignFunctionG") {
+
+        INIT();
+
+        Plaintext plain;
+        Ciphertext cipher_in,cipher_out;
+
+        vector<double> v = {-0.4000000,0.5000000000,1,-1};
+        encoder.encode(v, scale, plain);
+        encryptor.encrypt(plain,cipher_in);
+
+        compute_sign_g(cipher_in,cipher_out, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
+        
+        vector<double> v_expect = {-5.544986942,10.61339285,236.2117944,-236.2117944};
+        vector<double> v_out;
+        decryptor.decrypt(cipher_out,plain);
+        encoder.decode(plain, v_out);
+        
+        for(int i = 0; i<4;i++) {
+             CHECK(doctest::Approx(v_out[i]) == v_expect[i]);
+        }
+    }
+
+    TEST_CASE("GeluP") {
+
+        INIT();
+
+        Plaintext plain;
+        Ciphertext cipher_in,cipher_out;
+
+        vector<double> v = {-0.4,0.5,1,-1};
+        encoder.encode(v, scale, plain);
+        encryptor.encrypt(plain,cipher_in);
+
+        compute_gelu_p(cipher_in,cipher_out, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
+        
+        vector<double> v_expect = {-0.3501723443,-0.7345966621,-1.036827125,-0.188669242};
+        vector<double> v_out;
+        decryptor.decrypt(cipher_out,plain);
+        encoder.decode(plain, v_out);
+        
+        for(int i = 0; i<4;i++) {
+            CHECK(doctest::Approx(v_out[i]) == v_expect[i]);
+        }
+    }
+
+    TEST_CASE("GeluQ") {
+
+        INIT();
+
+        Plaintext plain;
+        Ciphertext cipher_in,cipher_out;
+
+        vector<double> v = {-3,5,1,-1};
+        encoder.encode(v, scale, plain);
+        encryptor.encrypt(plain,cipher_in);
+
+        compute_gelu_q(cipher_in,cipher_out, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
+        
+        vector<double> v_expect = {-0.5845409261,13.43445935,0.8339413477,-0.1655280783};
+        vector<double> v_out;
+        decryptor.decrypt(cipher_out,plain);
+        encoder.decode(plain, v_out);
+        
+        for(int i = 0; i<4;i++) {
+            CHECK(doctest::Approx(v_out[i]) == v_expect[i]);
+        }
+    }
+}
+
+TEST_SUITE("IterApprox") {
+
+    TEST_CASE("Goldschmidt") {
+
+        INIT();
+
+        Plaintext plain;
+        Ciphertext cipher_in,cipher_out;
+
+        vector<double> v = {0.0035,0.4,0.67};
+        encoder.encode(v, scale, plain);
+        encryptor.encrypt(plain,cipher_in);
+
+        compute_inverse(cipher_in,cipher_out,8, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
+        
+        vector<double> v_expect = {169.26910130445748,2.499999999999999,1.4925373134328357};
+        vector<double> v_out;
+        decryptor.decrypt(cipher_out,plain);
+        encoder.decode(plain, v_out);
+        
+        for(int i = 0; i<3;i++) {
+             CHECK(doctest::Approx(v_out[i]) == v_expect[i]);
+        }
+    }
+
+    TEST_CASE("Newton") {
+
+        INIT();
+
+        Plaintext plain;
+        Ciphertext cipher_in,cipher_out;
+
+        vector<double> v = {20,100,0.05};
+        encoder.encode(v, scale, plain);
+        encryptor.encrypt(plain,cipher_in);
+
+        compute_inv_sqrt(cipher_in,cipher_out,3,0.1, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
+        
+        vector<double> v_expect = {0.21299612278784003,0.09999999999999999,0.337032947479256};
+        vector<double> v_out;
+        decryptor.decrypt(cipher_out,plain);
+        encoder.decode(plain, v_out);
+        
+        for(int i = 0; i<3;i++) {
+             CHECK(doctest::Approx(v_out[i]) == v_expect[i]);
         }
     }
 }
