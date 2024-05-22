@@ -1,0 +1,1 @@
+./lolremez/lolremez --double -d 6 -r "-1.95:3" "x*0.5*(1+tanh(sqrt(2/pi)*(x+0.044715*x^3)))"
