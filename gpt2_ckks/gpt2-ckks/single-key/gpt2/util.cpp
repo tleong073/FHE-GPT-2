@@ -1,4 +1,4 @@
-#include "gpt2_seal.h"
+#include "approx.h"
 
 TensorCipher::TensorCipher()
 {
@@ -167,6 +167,39 @@ Config::Config(
 	this->total_level = remaining_level + boot_level;
 }
 
+/*
+class CKKSObjects
+{
+public:
+	CKKSEncoder *encoder;
+	Encryptor *Encryptor;
+	Evaluator *evaluator;
+	Decryptor *decryptor;
+	GaloisKeys * gal_keys;
+	RelinKeys *relin_keys;
+	CKKSObjects();
+	CKKSObjects(
+	 CKKSEncoder &encoder,
+	 Encryptor &encryptor,
+	 Decryptor &decryptor,
+	 Evaluator &evaluator,
+	 GaloisKeys &gal_keys,
+	 RelinKeys &relin_keys);
+}
+*/
+
+CKKSObjects::CKKSObjects() 
+{
+	this->encoder = NULL;
+	this->decryptor = NULL;
+	this->evaluator = NULL;
+	this->encryptor = NULL;
+	this->gal_keys = NULL;
+	this->relin_keys = NULL;
+}
+
+
+//CITE: copied from FHE-CNN-CKKS
 void memory_save_rotate(const Ciphertext &cipher_in, Ciphertext &cipher_out, int steps, Evaluator &evaluator, GaloisKeys &gal_keys)
 {
 	
@@ -174,12 +207,12 @@ void memory_save_rotate(const Ciphertext &cipher_in, Ciphertext &cipher_out, int
 	Ciphertext temp = cipher_in;
 	steps = (steps+n)%n;	// 0 ~ n-1
 	int first_step = 0;
-	printf("About to rotate \n");
 
 	if(34<=steps && steps<=55) first_step = 33;
 	else if(57<=steps && steps<=61) first_step = 33;
 	else first_step = 0;
 	if(steps == 0) return;		// no rotation
+	printf("About to rotate :%d steps\n",steps);
 	if(first_step == 0) evaluator.rotate_vector_inplace(temp, steps, gal_keys);
 	else
 	{
@@ -189,4 +222,19 @@ void memory_save_rotate(const Ciphertext &cipher_in, Ciphertext &cipher_out, int
 
 	cipher_out = temp;
 //	else scale_evaluator.rotate_vector(cipher_in, steps, gal_keys, cipher_out);
+}
+
+/**
+ * @brief Bootstrap replacement. 
+ * 
+ */
+void fakeBootstrap(Ciphertext &input, Ciphertext &output, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) {
+	Plaintext plain;
+	vector<double> res;
+
+	decryptor.decrypt(input,plain);
+	encoder.decode(plain, res);
+	encoder.encode(res, pow(2,51),plain);
+	encryptor.encrypt(plain, output);
 }
