@@ -48,7 +48,7 @@ def diagonal_to_row(matrix):
         output_rows.append(acc)
     return np.array(output_rows)
 
-# A*W, which is really row-wise AW^T
+# A@W, which is really row-wise AW^T
 def generic_matrix_mul(A,W,B,A_rows,A_cols,W_rows,W_cols):
 
 

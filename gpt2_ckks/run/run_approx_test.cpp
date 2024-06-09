@@ -4,6 +4,8 @@
 #include <iostream>
 #include <algorithm>
 #include "approx.h"
+#include "pack.h"
+#include "test_util.h"
 
 
 // SEAL and bootstrapping setting
@@ -17,11 +19,11 @@ long logn = 15;		// full slots
 long logn_1 = 14;	// sparse slots
 long logn_2 = 13;
 long logn_3 = 12;
-int logp = 51;
-int logq = 51;
-int log_special_prime = 51;
+int logp = LOGP;
+int logq = 50;
+int log_special_prime = 60;
 int log_integer_part = logq - logp - loge + 5;
-int remaining_level = 9; // Calculation required
+int remaining_level = 10; // Calculation required
 int boot_level = 1; // 
 int total_level = remaining_level + boot_level;
 
@@ -60,6 +62,99 @@ TEST_SUITE("Init") {
         
         CHECK(v[0]*v[0] == doctest::Approx(v_mod[0]));
         CHECK(v[1]*v[1] == doctest::Approx(v_mod[1]));
+    }
+
+}
+
+TEST_SUITE("Pack") {
+
+    TEST_CASE("MaskOut") {
+        INIT();
+
+        Plaintext plain;
+        Ciphertext in;
+
+        vec v= {1.0,2.0,3.0,4.0};
+        vector<double> res;
+        res.resize(32768,1.0);
+        vector<double> ones = {1.0,1.0,1.0,1.0};
+        ones.resize(32768,1.0);
+        encoder.encode(v,scale,plain);
+        encryptor.encrypt(plain,in);
+
+        encoder.encode(ones,scale,plain);
+        
+        int amt = 512;
+        Ciphertext out;
+        evaluator.rotate_vector(in,amt,gal_keys,out);
+        decrypt_and_print_and_max_round(out,decryptor,encoder,1.0,0);
+
+        decryptor.decrypt(out,plain);
+        encoder.decode(plain,res);
+
+        for(int i = 32768-amt; i<32768-amt+4;i++)
+            CHECK(doctest::Approx(res[i]) == v[i-(32768-amt)]);
+    }
+
+    TEST_CASE("PackFromRow") {
+
+        INIT();
+        printf("TESTING PACK FROM ROW\n");
+
+        Plaintext plain;
+
+        vector<Ciphertext> out;
+        vector<Ciphertext> out2;
+
+        vector<Plaintext> out_plain;
+        vector<double> tmp_vector;
+        vector<vector<double>> res;
+
+        // Init output vectors
+        init_output(8,out,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        init_output(3,out2,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+        // Init test matrix
+        vector<vector<double>> A(128,vector<double>(768,0.0));
+        for(int i = 0;i<128;i++) {
+            for(int j = 0; j<768;j++) {
+                A[i][j] = i*768+j;
+            }
+        }
+
+        // Init exp matrix
+        vector<vector<double>> A_exp(3,vector<double>(32768,0.0));
+        for(int i = 0;i<3;i++) {
+            for(int j = 0; j<32768;j++) {
+                A_exp[i][j] = i*32768+j;
+            }
+        }
+
+        printf("Done with init\n");
+        decrypt_and_print_and_max_round(out[0],decryptor,encoder,1.0,0);
+        // Pack from row
+        pack_from_row(A,out,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        
+        printf("Done packing from row\n");
+        decrypt_and_print_and_max_round(out[0],decryptor,encoder,1.0,0);
+
+        // Pack tight
+        pack_tight(out,out2,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+        printf("Done packing tight\n");
+
+        for(int i = 0; i<3;i++) {
+            decryptor.decrypt(out2[i],plain);
+            encoder.decode(plain,tmp_vector);
+            res.push_back(tmp_vector);
+        }
+
+        // Check correctness
+        for(int i = 0; i<3;i++) {
+            for(int j = 0; j<32768;j++) {
+                CHECK(doctest::Approx(res[i][j]) == A_exp[i][j]);
+            }
+        }
     }
 
 }
@@ -134,118 +229,122 @@ TEST_SUITE("MatrixMul") {
 
         INIT();
         Plaintext plain;
-        Ciphertext cipher;
+        Ciphertext cipher,zero_cipher;
 
-        vector<vector<double>> left_input_init, weights;
-        vector<TensorCipher> tmp_tcipher;
-        vector<vector<TensorCipher>> left_inputs;
-        TensorCipher tensor;
-        Config config;
-        
-        size_t slot_count = encoder.slot_count();
-        cout << "Number of slots: " << slot_count << endl;
+        // Setup Ingredients
+        vvec A1(8,vector<double>(2048,1.0));
+        vvec A2(8,vector<double>(2048,1.0));
+        vvec A_t(2048,vector<double>(8,1.0));
 
-        vector<double> v1 = {1.0,2.0,3.0};
-        vector<double> v2 = {4.0,5.0,6.0};
-        left_input_init.push_back(v1);
-        left_input_init.push_back(v2);
 
-        vector<double> w1 = {1.0,2.0,3.0};
-        vector<double> w2 = {4.0,5.0,6.0};
-        vector<double> w3 = {7.0,8.0,9.0};
-        weights.push_back(w1);
-        weights.push_back(w2);
-        weights.push_back(w3);
+        vvec A_exp(8,vector<double>(8,0.0));
+        vec zero_bias(32768,0.0000001);
 
-        int rows = 2,cols = 3;
-        for(int i = 0; i < rows; i++){
-            tmp_tcipher.clear();
-            for(int j = 0; j< cols;j++) {
-                // Each element gets expanded.
-                vector<double> v(cols,left_input_init[i][j]);
-                encoder.encode(v, scale, plain);
-                encryptor.encrypt(plain, cipher);
+        encoder.encode(zero_bias,ENCODE_SCALE,plain);
+        encryptor.encrypt(plain,zero_cipher);
 
-                tensor = TensorCipher(cipher);
-                tmp_tcipher.push_back(tensor);
+        printf("ABOUT TO PLAIN MATMUL\n");
+        transpose(A2,A_t);
+        matrix_mul(A1,A_t,A_exp);
+
+        printf("ABOUT TO INIT OUTPUT\n");
+        vector<Ciphertext>A1_cipher,A2_cipher,output,pack_out;
+        //init_output(1,A1_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        //init_output(1,A2_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        init_output(1,output,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+        //pack_from_row(A1,A1_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        //pack_from_row(A2,A2_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        vvec A1_pre(1,vec(32768,0.0));
+        vvec A2_pre(1,vec(32768,0.0));
+
+        pack_plain_row(A1,8,2048,A1_pre);
+        pack_plain_row(A2,8,2048,A2_pre);
+
+        encoder.encode(A1_pre[0],ENCODE_SCALE,plain);
+        encryptor.encrypt(plain,cipher);
+        A1_cipher.push_back(cipher);
+
+        decrypt_and_print_and_max_round(A1_cipher[0],decryptor,encoder,1.0,0);
+
+        encoder.encode(A2_pre[0],ENCODE_SCALE,plain);
+        encryptor.encrypt(plain,cipher);
+        A2_cipher.push_back(cipher);
+
+
+        printf("Done packing into ciphertexts\n");
+       
+
+        Config conf;
+        row_matrix_multiplication_seal(A1_cipher,A2_cipher,zero_cipher,output,8,2048,2048,8,conf,
+                        encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        printf("Done with matmul\n");
+
+        int global_idx=0;
+        vec res;
+        decryptor.decrypt(output[0],plain);
+        encoder.decode(plain,res);
+        for(int i =0; i<8;i++){
+            for(int j =0;j<8;j++) {
+                CHECK(doctest::Approx(res[i*16+j]) == A_exp[i][j]);
             }
-            left_inputs.push_back(tmp_tcipher);
         }
-
-        printf("Setup Complete: \n");
-        vector<TensorCipher> outputs;
-        vector<double> output_unencoded;
-        vector<double> bias;
-
-        row_matrix_multiplication_seal(left_inputs, weights, outputs, bias, rows, cols, config, 
-            encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
         
-        vector<vector<double>> expect;
-        expect.push_back({30.0,36.0,42.0});
-        expect.push_back({66.0,81.00,96.00});
-
-        for(int i = 0; i<rows;i++) {
-            decryptor.decrypt(outputs[i].cipher(),plain);
-            encoder.decode(plain, output_unencoded);
-            for(int j =0 ; j< cols;j++) {
-                printf("%f ",output_unencoded[j]);
-                CHECK(doctest::Approx(output_unencoded[j]) == expect[i][j]);
-            }
-            printf("\n");
-        }
+        
+        
     }
-
-    TEST_CASE("DiagRowMat") {
+    TEST_CASE("AttnProjRow") {
+        // Test 
 
         INIT();
         Plaintext plain;
-        Ciphertext cipher;
+        Ciphertext cipher,zero_cipher;
 
-        vector<vector<double>> inputs;
-        vector<TensorCipher> tmp_tcipher;
-        vector<vector<TensorCipher>> left_inputs;
-        vector<TensorCipher> inputs_encrypted;
-        TensorCipher tensor;
-        Config config;
-        
-        size_t slot_count = encoder.slot_count();
-        cout << "Number of slots: " << slot_count << endl;
+        // Setup Ingredients
+        vvec A1(16,vector<double>(1024,1.0));
+        vvec A2(1024,vector<double>(16,1.0));
+        vvec A_t(16,vector<double>(1024,0.0));
 
+        vvec A_exp(16,vector<double>(16,0.0));
+        vec zero_bias(32768,0.0000001);
+        vvec A2_out(1,vec(32768,0.0));
 
-        vector<double> w1 = {1.0,2.0,3.0};
-        vector<double> w2 = {4.0,5.0,6.0};
-        vector<double> w3 = {7.0,8.0,9.0};
-        inputs.push_back(w1);
-        inputs.push_back(w2);
-        inputs.push_back(w3);
-
-        int rows = 3,cols = 3;
-        for(int i = 0; i < rows; i++){
-            encoder.encode(inputs[i], scale, plain);
-            encryptor.encrypt(plain, cipher);
-            tensor = TensorCipher(cipher);
-            inputs_encrypted.push_back(tensor);
+        for(int i=0; i<1024;i++){
+            for(int j=0;j<16;j++) {
+                //printf("%d %f %f ",j,(double)(i*768+j),A2[i][j]);
+                A2[i][j] = (double)(16*i+j);
+                printf("%f\n",i,A2[i][j]);
+            }
         }
 
-        printf("Setup Complete: \n");
-        vector<TensorCipher> outputs;
-        vector<double> output_unencoded;
-
-        diagonal_to_row_matrix_seal( inputs_encrypted,outputs, rows,  cols,config,
-	         encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
+        printf("ABOUT TO PLAIN MATMUL\n");
+        transpose(A2,A_t);
+        matrix_mul(A1,A2,A_exp);
         
-        vector<vector<double>> expect;
-        expect.push_back({1.0,4.0,7.0});
-        expect.push_back({2.0,5.0,8.0});
-        expect.push_back({3.0,6.0,9.0});
+        printf("ABOUT TO INIT OUTPUT\n");
+        vector<Ciphertext>A1_cipher,A2_cipher,output,pack_out;
+        //init_output(1,A1_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        //init_output(48,A2_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        init_output(12,output,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
 
-        int idx;
-        printf("Decrypting\n");
-        for(int i = 0; i<rows;i++) {
-            decryptor.decrypt(outputs[i].cipher(),plain);
-            encoder.decode(plain, output_unencoded);
-            for(int j =0 ; j< cols;j++) {
-                CHECK(doctest::Approx(output_unencoded[j]) == expect[i][j]);
+        printf("Packing from Row\n");
+        pack_from_row(A1,A1_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        pack_from_row(A_t,A2_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        
+        printf("Done packing into ciphertexts: A1: %zu  A2: %zu\n",A1_cipher.size(),A2_cipher.size());
+
+        Config conf;
+        attn_proj_row_seal(A1_cipher,A2_cipher,output,16,1024,1024,16,conf,
+                                encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        printf("Done with matmul\n");
+
+        int global_idx=0;
+        vec res;
+        decryptor.decrypt(output[0],plain);
+        encoder.decode(plain,res);
+        for(int i =0; i<1;i++){
+            for(int j =0;j<16;j++) {
+                CHECK(doctest::Approx(res[j*16+(j*17)]) == A_exp[i][j]);
             }
         }
     }
@@ -408,18 +507,18 @@ TEST_SUITE("IterApprox") {
         Plaintext plain;
         Ciphertext cipher_in,cipher_out;
 
-        vector<double> v = {20,100,0.05};
+        vector<double> v = {20,100,0.05,25};
         encoder.encode(v, scale, plain);
         encryptor.encrypt(plain,cipher_in);
 
         compute_inv_sqrt(cipher_in,cipher_out,3,0.1, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
         
-        vector<double> v_expect = {0.21299612278784003,0.09999999999999999,0.337032947479256};
+        vector<double> v_expect = {0.21299612278784003,0.09999999999999999,0.337032947479256,0.2};
         vector<double> v_out;
         decryptor.decrypt(cipher_out,plain);
         encoder.decode(plain, v_out);
         
-        for(int i = 0; i<3;i++) {
+        for(int i = 0; i<v.size();i++) {
              CHECK(doctest::Approx(v_out[i]) == v_expect[i]);
         }
     }
@@ -455,22 +554,20 @@ TEST_SUITE("Fold") {
         INIT();
 
         Plaintext plain;
-        Ciphertext cipher;
+        Ciphertext cipher1,cipher2;
 
         TensorCipher tensor1;
         TensorCipher tensor2;
 
-        vector<double> v = {1,2,3,4,5,6,7,8};
+        vector<double> v = {1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8};
         encoder.encode(v, scale, plain);
 
-        encryptor.encrypt(plain,cipher);
+        encryptor.encrypt(plain,cipher1);
 
-        tensor1 = TensorCipher(cipher);
-
-        quickSum(tensor1,tensor2,8,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        quickSum(cipher1,cipher2,8,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
 
         vector<double> v_expect  = vector<double>(8,36.0),v_res;
-        decryptor.decrypt(tensor2.cipher(),plain);
+        decryptor.decrypt(cipher2,plain);
         encoder.decode(plain, v_res);
         
         for(int i = 0; i<v_expect.size();i++) {
@@ -513,7 +610,7 @@ TEST_SUITE("Fold") {
         INIT();
 
         Plaintext plain;
-        Ciphertext cipher;
+        Ciphertext cipher,out_cipher;
 
         TensorCipher tensor1;
         TensorCipher tensor2;
@@ -523,12 +620,11 @@ TEST_SUITE("Fold") {
 
         encryptor.encrypt(plain,cipher);
 
-        tensor1 = TensorCipher(cipher);
 
-        quickMax(tensor1,tensor2,8,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        quickMax(cipher,out_cipher,8,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
 
         vector<double> v_expect  = vector<double>(8,0.8),v_res;
-        decryptor.decrypt(tensor2.cipher(),plain);
+        decryptor.decrypt(out_cipher,plain);
         encoder.decode(plain, v_res);
         
         for(int i = 0; i<v_expect.size();i++) {

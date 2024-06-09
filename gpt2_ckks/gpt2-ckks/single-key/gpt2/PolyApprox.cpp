@@ -434,8 +434,77 @@ void compute_gelu_q(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     return;
 }
 
-void gelu(TensorCipher &inputs,TensorCipher &outputs, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+void gelu(Ciphertext &inputs,Ciphertext &outputs, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys){
+                            return;
+}
+
+/*
+def exp(x,r):
+    return math.pow(1+x/(math.pow(2,6)),math.pow(2,6))
+*/
+
+void compute_exp(Ciphertext &input,Ciphertext &output,int r, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys)
 {
+    double power = pow(2,r);
+    // Compute term to exponentiate
+    evaluator.multiply_const(input,1/power,output);
+    evaluator.rescale_to_next_inplace(output);
+    evaluator.add_const_inplace(output,1);
+    
+    // Exponentiate
+    for(int i =0;i<r;i++) {
+        evaluator.square_inplace(output);
+        evaluator.relinearize_inplace(output,relin_keys);
+        evaluator.rescale_to_next_inplace(output);
+        printf("SCALE: %f\n",output.scale());
+    }
+
     return;
+}
+
+void compute_softmax(Ciphertext &input,int r, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys)
+{   
+    int i,j;
+
+    Plaintext plain_ones,plain_zeros;
+    Ciphertext cipher,rolled,maxes,exps,sums,inverse;
+
+    vector<double> ones_mask(32768,0.0);
+    vector<double> zeros_mask(32768,1.0);
+
+    encoder.encode(ones_mask,ENCODE_SCALE,plain_ones);
+    encoder.encode(zeros_mask,ENCODE_SCALE,plain_zeros);
+
+
+    for(i=0;i<128;i++){
+        for(j=0;j<128;j++){
+            ones_mask[i*256+128+j] = 1.0;
+            zeros_mask[i*256+128+j] = 0.0;
+        }
+    }
+
+    // Prepare cipher for folding
+    evaluator.rotate_vector(input,32768-128,gal_keys,rolled);
+    evaluator.add_inplace_reduced_error(input,rolled);
+
+    quickMax(input,maxes,128,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+    // Subtract out max
+    evaluator.sub_inplace_reduced_error(input,maxes);
+
+    // Compute exp and subtract out ones
+    compute_exp(input,exps,6,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    evaluator.sub_plain_inplace(input,plain_ones);
+
+    // Compute sum
+    evaluator.rotate_vector(exps,32768-128,gal_keys,rolled);
+    quickSum(rolled,sums,128,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+    // Goldschmidt division
+    compute_inverse(sums,inverse,4,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    evaluator.multiply_reduced_error(exps,inverse,relin_keys,input);
+
 }

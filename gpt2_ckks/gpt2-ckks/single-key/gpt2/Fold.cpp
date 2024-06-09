@@ -17,20 +17,20 @@ def quickSum(vec,n):
     return vec
 */
 
-void quickSum(TensorCipher &input,TensorCipher &output,int n, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+void quickSum(Ciphertext &input,Ciphertext &output,int n, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) {
     
-    Ciphertext cipher = input.cipher(),rot_cipher;
-    evaluator.rotate_vector(cipher,-n,gal_keys,rot_cipher);
-    evaluator.add_inplace_reduced_error(cipher,rot_cipher);
+    Ciphertext cipher;
+    output=input;
     int acc = 1;
-    for(int i = 0; i<log(n);i++) {
-        decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0);
-        evaluator.rotate_vector(cipher,acc,gal_keys,rot_cipher);
-        evaluator.add_inplace_reduced_error(cipher,rot_cipher);
+    printf("-----GAP-----\n");
+    for(int i = 0; i<floor(log2(n));i++) {
+        printf("Folding2: %d %d %d\n",i,(int)(floor(log2(n))),acc);
+        evaluator.rotate_vector(output,acc,gal_keys,cipher);
+        evaluator.add_inplace_reduced_error(output,cipher);
         acc *= 2;
+        decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0);
     }
-    output.set_ciphertext(cipher);
     return;
 }
 
@@ -58,20 +58,20 @@ void computeMax(Ciphertext &input1,Ciphertext &input2,Ciphertext &output, CKKSEn
     return;
 }
 
-void quickMax(TensorCipher &input,TensorCipher &output,int n, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+void quickMax(Ciphertext &input,Ciphertext &output,int n, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) {
-    Ciphertext cipher = input.cipher(),rot_cipher;
+    Ciphertext cipher = input,rot_cipher;
 
     evaluator.rotate_vector(cipher,-n,gal_keys,rot_cipher);
     evaluator.add_inplace(cipher,rot_cipher);
 
     int acc = 1;
-    for(int i = 0; i<log(n);i++) {
+    for(int i = 0; i<log2(n);i++) {
         evaluator.rotate_vector(cipher,acc,gal_keys,rot_cipher);
         computeMax(cipher,rot_cipher,cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
         fakeBootstrap(cipher,cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
         acc *= 2;
     }
-    output.set_ciphertext(cipher);
+    output = cipher;
     return;
 }

@@ -1,4 +1,8 @@
-#include "approx.h"
+#include "util.h"
+#include <math.h>
+
+using namespace std;
+using namespace seal;
 
 TensorCipher::TensorCipher()
 {
@@ -36,18 +40,18 @@ TensorCipher::TensorCipher(int logn, int k, int h, int w, int c, int t, int p, v
 	this->logn_ = logn;
 
 	// generate vector that contains data
-	vector<double> vec;
-    for(int i=0; i<static_cast<int>(data.size()); i++) vec.emplace_back(data[i]);
-    for(int i=data.size(); i<1<<logn; i++) vec.emplace_back(0);      // zero padding
+	vector<double> v;
+    for(int i=0; i<static_cast<int>(data.size()); i++) v.emplace_back(data[i]);
+    for(int i=data.size(); i<1<<logn; i++) v.emplace_back(0);      // zero padding
 
     // vec size = n
-    if(vec.size() != static_cast<long unsigned int>(1<<logn)) throw std::out_of_range("the size of vec is not n");
+    if(v.size() != static_cast<long unsigned int>(1<<logn)) throw std::out_of_range("the size of vec is not n");
 
 	// encode & encrypt
 	Plaintext plain;
 	Ciphertext cipher;
 	double scale = pow(2.0, logp);
-	encoder.encode(vec, scale, plain);
+	encoder.encode(v, scale, plain);
 	encryptor.encrypt(plain, cipher);
 	this->set_ciphertext(cipher);
 
@@ -200,28 +204,54 @@ CKKSObjects::CKKSObjects()
 
 
 //CITE: copied from FHE-CNN-CKKS
-void memory_save_rotate(const Ciphertext &cipher_in, Ciphertext &cipher_out, int steps, Evaluator &evaluator, GaloisKeys &gal_keys)
-{
-	
-	long n = cipher_in.poly_modulus_degree() / 2;
-	Ciphertext temp = cipher_in;
-	steps = (steps+n)%n;	// 0 ~ n-1
-	int first_step = 0;
-
-	if(34<=steps && steps<=55) first_step = 33;
-	else if(57<=steps && steps<=61) first_step = 33;
-	else first_step = 0;
+void rotate_inplace(Ciphertext &cipher_in, int steps, Evaluator &evaluator, GaloisKeys &gal_keys)
+{	
+	int n = cipher_in.poly_modulus_degree() / 2;
+	int rot_amt = steps;
 	if(steps == 0) return;		// no rotation
-	printf("About to rotate :%d steps\n",steps);
-	if(first_step == 0) evaluator.rotate_vector_inplace(temp, steps, gal_keys);
-	else
-	{
-		evaluator.rotate_vector_inplace(temp, first_step, gal_keys);
-		evaluator.rotate_vector_inplace(temp, steps-first_step, gal_keys);
+	
+	
+	if(steps < 0){
+		rot_amt = 32768+steps;
+	} 
+	printf("Rot amt: %d\n",rot_amt);
+	if(rot_amt == 16384){
+		evaluator.rotate_vector_inplace(cipher_in,rot_amt-2048,gal_keys);
+		evaluator.rotate_vector_inplace(cipher_in,2048,gal_keys);
+	} else {
+		evaluator.rotate_vector_inplace(cipher_in,rot_amt,gal_keys);
 	}
-
-	cipher_out = temp;
+	
 //	else scale_evaluator.rotate_vector(cipher_in, steps, gal_keys, cipher_out);
+}
+
+void rotate_vec(const Ciphertext &cipher_in, Ciphertext & cipher_out, int steps, Evaluator &evaluator, GaloisKeys &gal_keys)
+{	
+	int n = cipher_in.poly_modulus_degree() / 2;
+	int rot_amt = steps;
+	if(steps == 0) return;		// no rotation
+	
+	
+	if(steps < 0){
+		rot_amt = 32768+steps;
+	} 
+
+	printf("Rot amt: %d\n",rot_amt);
+	if(rot_amt == 16384){
+		evaluator.rotate_vector(cipher_in,rot_amt-2048,gal_keys,cipher_out);
+		evaluator.rotate_vector_inplace(cipher_out,2048,gal_keys);
+	} else {
+		evaluator.rotate_vector(cipher_in,rot_amt,gal_keys,cipher_out);
+	}
+	
+//	else scale_evaluator.rotate_vector(cipher_in, steps, gal_keys, cipher_out);
+}
+/*
+def round_to_2(x):
+    return math.pow(2,math.ceil(math.log(x,2)))
+*/
+int round_to_2(double x) {
+	return pow(2.0,ceil(log2(x)));
 }
 
 /**
@@ -237,4 +267,49 @@ void fakeBootstrap(Ciphertext &input, Ciphertext &output, CKKSEncoder &encoder, 
 	encoder.decode(plain, res);
 	encoder.encode(res, pow(2,51),plain);
 	encryptor.encrypt(plain, output);
+}
+
+void init_output(int num_ciphers,vector<Ciphertext> &output, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) {		
+						
+	vector<double> x(1,0.0);
+	Plaintext plain;
+	Ciphertext cipher;
+
+	for(int i = 0; i<num_ciphers;i++){
+		encoder.encode(x,ENCODE_SCALE,plain);
+		encryptor.encrypt(plain,cipher);
+		output.push_back(cipher);
+	}
+}
+
+// Masks out length elements starting from start
+void mask_out(Ciphertext &cipher,Ciphertext &out, int start,int length,CKKSEncoder &encoder,Evaluator &evaluator,RelinKeys &relin_keys) {
+    vector<double> x(32768,0.0);
+    Plaintext plain;
+
+    fill(x.begin()+start,x.begin()+start+length,1.0);
+	printf("mask_out start: %d length: %d \n",start,length);
+
+    encoder.encode(x, ENCODE_SCALE,plain);
+	
+    evaluator.multiply_plain(cipher,plain,out);
+	printf("mask_out mul done : %d\n",out.is_transparent());
+    evaluator.relinearize_inplace(out,relin_keys);
+    evaluator.rescale_to_next_inplace(out);
+}
+
+// Row packs a matrix into a ciphertext
+void pack_plain_row(vector<vector<double>>& v,int rows,int row_size,vector<vector<double>> &out) {
+	int rounded_row_size = round_to_2(row_size);
+	int pos=0;
+	
+	for(int i = 0;i<rows;i++){
+		for(int j = 0; j<row_size;j++) {
+			pos = i*rounded_row_size*2+j;
+			//printf("%d %d %d %d %d %f\n",pos,pos/32768,pos%32768,i,j,vec[i][j]);
+			out[pos / 32768][pos % 32768] = v[i][j];
+		}
+	}
+	return;
 }
