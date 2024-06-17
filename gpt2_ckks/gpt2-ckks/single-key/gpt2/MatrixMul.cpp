@@ -241,7 +241,7 @@ void diagonal_to_row_matrix_seal( vector<TensorCipher>&inputs,vector<TensorCiphe
  * @param argMap current procedure's arguments
  */
 void attn_proj_row_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
-	int A_rows, int A_cols,int W_rows,int W_cols, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
 
 		// Row and column dimension computations
 
@@ -256,20 +256,23 @@ void attn_proj_row_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &we
 			for(int j = 0; j<weights.size();j++) {
 				for(int rots = 0; rots<16;rots++){
 					printf("HEADER: %d %d %d\n",i,j,rots);
+
 					tmp_cipher = weights[j];
 					rotate_inplace(tmp_cipher,rots*2048,evaluator,gal_keys);
 					evaluator.multiply_reduced_error(left_inputs[i],tmp_cipher,relin_keys,res1);
 					evaluator.rescale_to_next_inplace(res1);
-					tmp_cipher = res1;
-					evaluator.rotate_vector_inplace(tmp_cipher,-1024,gal_keys);
-					evaluator.add_inplace_reduced_error(tmp_cipher,res1);
 
-					// Preform Row/Vector Dot product
-					quickSum(tmp_cipher,res,1024,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+					evaluator.rotate_vector(res1,-1024,gal_keys,rolled);
+					evaluator.add_inplace_reduced_error(rolled,res1);
 
 					if(i == 0 && j == 0 && rots == 0){
-						decrypt_and_print_and_max_round(res,decryptor,encoder,1.0,0);
+						printf("Printing Res: \n");
+						decrypt_and_print_and_max_round(rolled,decryptor,encoder,1.0,0);
 					}
+
+					// Preform Row/Vector Dot product
+					quickSum(rolled,res,1024,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
 
 					for(int pos = 0; pos<16;pos++) {
 						row = i * 16 + pos;
@@ -286,7 +289,14 @@ void attn_proj_row_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &we
 						desired_location = row*A_rows+head_col;
 
 						shift_amt = desired_location - pos*2048;
-						rotate_inplace(masked_out,-shift_amt,evaluator,gal_keys);
+						printf("Shift amt: %d\n",shift_amt);
+
+						vector<int> steps;
+						steps.push_back(-shift_amt);
+						GaloisKeys tmp_keys;
+						keygen.create_galois_keys(steps,tmp_keys);
+
+						evaluator.rotate_vector_inplace(masked_out,-shift_amt,tmp_keys);
 						printf("desired_location: %d %d %d %d\n",desired_location,shift_amt,pos,outputs[head].is_transparent());
 						evaluator.add_inplace_reduced_error(outputs[head],masked_out);
 						

@@ -1,16 +1,22 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(cnn_ckks_project)
+project(gpt2_ckks_project)
 set(CMAKE_CXX_COMPILER g++)
 
 option(COMP "Build comparison operation" OFF)
-option(BOOT "Build comparison operation" OFF)
+option(BOOT "Build boot operation" OFF)
 option(CNN "Build comparison operation" OFF)
-option(APPROX_TEST "Build comparison operation" TRUE)
-option(LAYER_TEST "Build comparison operation" TRUE)
+option(APPROX_TEST "Build comparison operation" OFF)
+option(LAYER_TEST "Build comparison operation" OFF)
+option(MICROBENCH "Build microbenchmark configuration" OFF)
+option(BENCH "Build benhcmark configuration" OFF)
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./run)
 #include("~/mylibs/lib/cmake/SEAL-3.6/SEALConfig.cmake")
 find_package(SEAL 3.6 REQUIRED)
+
+add_subdirectory(common)
+add_subdirectory(gpt2-ckks/single-key/gpt2)
+add_subdirectory(gpt2-ckks/single-key/ckks_bootstrapping)
 
 
 if(COMP)
@@ -29,8 +35,10 @@ if(COMP)
 endif()
 
 if(BOOT)
+	message(STATUS "Inside BOOT")
 	add_subdirectory(common)
-	add_subdirectory(cpu-ckks/single-key/ckks_bootstrapping)
+	add_subdirectory(gpt2-ckks/single-key/ckks_bootstrapping)
+	add_subdirectory(gpt2-ckks/single-key/gpt2)
 
 	add_executable(bootstrapping)
 	target_sources(bootstrapping
@@ -41,28 +49,21 @@ if(BOOT)
 	)
 	target_compile_options(bootstrapping PRIVATE -Wall -O0 -std=c++17 -pthread -march=native)
 	target_link_libraries(bootstrapping PRIVATE ntl gmp m pthread SEAL::seal)
-	target_include_directories(bootstrapping PUBLIC /usr/local/include /usr/local/include/NTL ${COMMON_HEADER_DIR} ${BOOTSTRAPPING_HEADER_DIR})
+	target_include_directories(bootstrapping PUBLIC /usr/local/include /usr/local/include/NTL ${COMMON_HEADER_DIR} ${BOOTSTRAPPING_HEADER_DIR} )
+
+	add_executable(bootstrap_basic)
+	target_sources(bootstrap_basic
+		PRIVATE
+			./run/run_minimal_bootstrap.cpp
+			${COMMON_SOURCE_FILES}
+			${BOOTSTRAPPING_SOURCE_FILES}
+			${GPT2_SOURCE_FILES}
+	)
+	target_compile_options(bootstrap_basic PRIVATE -Wall -O0 -std=c++17 -pthread -march=native)
+	target_link_libraries(bootstrap_basic PRIVATE ntl gmp m pthread SEAL::seal)
+	target_include_directories(bootstrap_basic PUBLIC /usr/local/include /usr/local/include/NTL ${COMMON_HEADER_DIR} ${BOOTSTRAPPING_HEADER_DIR} ${GPT2_HEADER_DIR})
 endif()
 
-if(CNN)
-	add_subdirectory(common)
-	add_subdirectory(cpu-ckks/single-key/cnn)
-	add_subdirectory(cpu-ckks/single-key/comp)
-	add_subdirectory(cpu-ckks/single-key/ckks_bootstrapping)
-	add_executable(cnn)
-	target_sources(cnn
-		PRIVATE
-			./run/run_cnn.cpp
-			${COMMON_SOURCE_FILES}
-			${CNN_SOURCE_FILES}
-			${COMP_SOURCE_FILES}
-			${BOOTSTRAPPING_SOURCE_FILES}
-	)
-	target_compile_options(cnn PRIVATE -w -O0 -std=c++17 -pthread -march=native -fopenmp)
-	target_link_libraries(cnn PRIVATE ntl gmp pthread SEAL::seal gomp)
-	target_include_directories(cnn PUBLIC /usr/include /usr/local/include /usr/local/include/NTL ${COMMON_HEADER_DIR} ${CNN_HEADER_DIR} ${COMP_HEADER_DIR} ${BOOTSTRAPPING_HEADER_DIR})
-	# target_include_directories(cnn PUBLIC /usr/include /usr/local/include /usr/local/include/NTL ${COMMON_HEADER_DIR} ${CNN_HEADER_DIR} ${COMP_HEADER_DIR})
-endif()
 
 if(APPROX_TEST)
 message(STATUS "Inside TEST")
@@ -82,17 +83,37 @@ message(STATUS "Inside TEST")
 	target_link_libraries(approx_test PRIVATE ntl gmp m pthread SEAL::seal gomp)
 	target_include_directories(approx_test PUBLIC ~/mylibs/include ~/mylibs/include/NTL  /usr/local/include ${COMMON_HEADER_DIR} ${GPT2_HEADER_DIR} ${COMP_HEADER_DIR} ${BOOTSTRAPPING_HEADER_DIR})
 
-	add_executable(layer_test)
-	target_sources(layer_test
+endif()
+
+if(MICROBENCH)
+message(STATUS "Inside MICROBENCH")
+	add_executable(microbench)
+	target_sources(microbench
 		PRIVATE
-			./run/run_layer_test.cpp
+			./run/microbenchmark.cpp
 			${COMMON_SOURCE_FILES}
 			${GPT2_SOURCE_FILES}
 			${COMP_SOURCE_FILES}
 			${BOOTSTRAPPING_SOURCE_FILES}
 	)
-	target_compile_options(layer_test PRIVATE -w -O0 -std=c++17 -pthread -march=native -fopenmp)
-	target_link_libraries(layer_test PRIVATE ntl gmp m pthread SEAL::seal gomp)
-	target_include_directories(layer_test PUBLIC ~/mylibs/include ~/mylibs/include/NTL  /usr/local/include ${COMMON_HEADER_DIR} ${GPT2_HEADER_DIR} ${COMP_HEADER_DIR} ${BOOTSTRAPPING_HEADER_DIR})
-	# target_include_directories(cnn PUBLIC /usr/include /usr/local/include /usr/local/include/NTL ${COMMON_HEADER_DIR} ${CNN_HEADER_DIR} ${COMP_HEADER_DIR})
+	target_compile_options(microbench PRIVATE -w -O0 -std=c++17 -pthread -march=native -fopenmp)
+	target_link_libraries(microbench PRIVATE ntl gmp pthread SEAL::seal gomp protobuf)
+	target_include_directories(microbench PUBLIC ~/FHE-GPT-2/gpt2_weights /usr/include/ /usr/local/include ${COMMON_HEADER_DIR} ${GPT2_HEADER_DIR} ${COMP_HEADER_DIR} ${BOOTSTRAPPING_HEADER_DIR})
+endif()
+
+if(BENCH)
+message(STATUS "Inside BENCH")
+	add_executable(bench)
+	target_sources(bench
+		PRIVATE
+			./run/infer_gpt2.cpp
+			/home/tmleong/FHE-GPT-2/gpt2_weights/weights.pb.cc
+			${COMMON_SOURCE_FILES}
+			${GPT2_SOURCE_FILES}
+			${COMP_SOURCE_FILES}
+			${BOOTSTRAPPING_SOURCE_FILES}
+	)
+	target_compile_options(bench PRIVATE -w -O3 -std=c++17 -pthread -march=native -fopenmp)
+	target_link_libraries(bench PRIVATE ntl gmp pthread SEAL::seal gomp protobuf)
+	target_include_directories(bench PUBLIC ~/FHE-GPT-2/gpt2_weights /usr/include/ /usr/local/include ${COMMON_HEADER_DIR} ${GPT2_HEADER_DIR} ${COMP_HEADER_DIR} ${BOOTSTRAPPING_HEADER_DIR})
 endif()

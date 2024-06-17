@@ -342,7 +342,7 @@ class Config():
     gamma_start:float
     device: str
 
-torch_device = 'cuda'
+torch_device = 'cpu'
 
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
 

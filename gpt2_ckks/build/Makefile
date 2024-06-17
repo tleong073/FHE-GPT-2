@@ -117,38 +117,24 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named approx_test
+# Target rules for targets named microbench
 
 # Build rule for target.
-approx_test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 approx_test
-.PHONY : approx_test
+microbench: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 microbench
+.PHONY : microbench
 
 # fast build rule for target.
-approx_test/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/build
-.PHONY : approx_test/fast
-
-#=============================================================================
-# Target rules for targets named layer_test
-
-# Build rule for target.
-layer_test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 layer_test
-.PHONY : layer_test
-
-# fast build rule for target.
-layer_test/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/build
-.PHONY : layer_test/fast
+microbench/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/build
+.PHONY : microbench/fast
 
 common/Choosemax.o: common/Choosemax.cpp.o
 .PHONY : common/Choosemax.o
 
 # target to build an object file
 common/Choosemax.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Choosemax.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Choosemax.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Choosemax.cpp.o
 .PHONY : common/Choosemax.cpp.o
 
 common/Choosemax.i: common/Choosemax.cpp.i
@@ -156,8 +142,7 @@ common/Choosemax.i: common/Choosemax.cpp.i
 
 # target to preprocess a source file
 common/Choosemax.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Choosemax.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Choosemax.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Choosemax.cpp.i
 .PHONY : common/Choosemax.cpp.i
 
 common/Choosemax.s: common/Choosemax.cpp.s
@@ -165,8 +150,7 @@ common/Choosemax.s: common/Choosemax.cpp.s
 
 # target to generate assembly for a file
 common/Choosemax.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Choosemax.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Choosemax.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Choosemax.cpp.s
 .PHONY : common/Choosemax.cpp.s
 
 common/MinicompFunc.o: common/MinicompFunc.cpp.o
@@ -174,8 +158,7 @@ common/MinicompFunc.o: common/MinicompFunc.cpp.o
 
 # target to build an object file
 common/MinicompFunc.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/MinicompFunc.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/MinicompFunc.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/MinicompFunc.cpp.o
 .PHONY : common/MinicompFunc.cpp.o
 
 common/MinicompFunc.i: common/MinicompFunc.cpp.i
@@ -183,8 +166,7 @@ common/MinicompFunc.i: common/MinicompFunc.cpp.i
 
 # target to preprocess a source file
 common/MinicompFunc.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/MinicompFunc.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/MinicompFunc.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/MinicompFunc.cpp.i
 .PHONY : common/MinicompFunc.cpp.i
 
 common/MinicompFunc.s: common/MinicompFunc.cpp.s
@@ -192,8 +174,7 @@ common/MinicompFunc.s: common/MinicompFunc.cpp.s
 
 # target to generate assembly for a file
 common/MinicompFunc.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/MinicompFunc.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/MinicompFunc.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/MinicompFunc.cpp.s
 .PHONY : common/MinicompFunc.cpp.s
 
 common/MinicompRemez.o: common/MinicompRemez.cpp.o
@@ -201,8 +182,7 @@ common/MinicompRemez.o: common/MinicompRemez.cpp.o
 
 # target to build an object file
 common/MinicompRemez.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/MinicompRemez.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/MinicompRemez.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/MinicompRemez.cpp.o
 .PHONY : common/MinicompRemez.cpp.o
 
 common/MinicompRemez.i: common/MinicompRemez.cpp.i
@@ -210,8 +190,7 @@ common/MinicompRemez.i: common/MinicompRemez.cpp.i
 
 # target to preprocess a source file
 common/MinicompRemez.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/MinicompRemez.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/MinicompRemez.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/MinicompRemez.cpp.i
 .PHONY : common/MinicompRemez.cpp.i
 
 common/MinicompRemez.s: common/MinicompRemez.cpp.s
@@ -219,8 +198,7 @@ common/MinicompRemez.s: common/MinicompRemez.cpp.s
 
 # target to generate assembly for a file
 common/MinicompRemez.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/MinicompRemez.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/MinicompRemez.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/MinicompRemez.cpp.s
 .PHONY : common/MinicompRemez.cpp.s
 
 common/Point.o: common/Point.cpp.o
@@ -228,8 +206,7 @@ common/Point.o: common/Point.cpp.o
 
 # target to build an object file
 common/Point.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Point.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Point.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Point.cpp.o
 .PHONY : common/Point.cpp.o
 
 common/Point.i: common/Point.cpp.i
@@ -237,8 +214,7 @@ common/Point.i: common/Point.cpp.i
 
 # target to preprocess a source file
 common/Point.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Point.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Point.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Point.cpp.i
 .PHONY : common/Point.cpp.i
 
 common/Point.s: common/Point.cpp.s
@@ -246,8 +222,7 @@ common/Point.s: common/Point.cpp.s
 
 # target to generate assembly for a file
 common/Point.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Point.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Point.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Point.cpp.s
 .PHONY : common/Point.cpp.s
 
 common/PolyUpdate.o: common/PolyUpdate.cpp.o
@@ -255,8 +230,7 @@ common/PolyUpdate.o: common/PolyUpdate.cpp.o
 
 # target to build an object file
 common/PolyUpdate.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/PolyUpdate.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/PolyUpdate.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/PolyUpdate.cpp.o
 .PHONY : common/PolyUpdate.cpp.o
 
 common/PolyUpdate.i: common/PolyUpdate.cpp.i
@@ -264,8 +238,7 @@ common/PolyUpdate.i: common/PolyUpdate.cpp.i
 
 # target to preprocess a source file
 common/PolyUpdate.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/PolyUpdate.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/PolyUpdate.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/PolyUpdate.cpp.i
 .PHONY : common/PolyUpdate.cpp.i
 
 common/PolyUpdate.s: common/PolyUpdate.cpp.s
@@ -273,8 +246,7 @@ common/PolyUpdate.s: common/PolyUpdate.cpp.s
 
 # target to generate assembly for a file
 common/PolyUpdate.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/PolyUpdate.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/PolyUpdate.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/PolyUpdate.cpp.s
 .PHONY : common/PolyUpdate.cpp.s
 
 common/Polynomial.o: common/Polynomial.cpp.o
@@ -282,8 +254,7 @@ common/Polynomial.o: common/Polynomial.cpp.o
 
 # target to build an object file
 common/Polynomial.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Polynomial.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Polynomial.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Polynomial.cpp.o
 .PHONY : common/Polynomial.cpp.o
 
 common/Polynomial.i: common/Polynomial.cpp.i
@@ -291,8 +262,7 @@ common/Polynomial.i: common/Polynomial.cpp.i
 
 # target to preprocess a source file
 common/Polynomial.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Polynomial.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Polynomial.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Polynomial.cpp.i
 .PHONY : common/Polynomial.cpp.i
 
 common/Polynomial.s: common/Polynomial.cpp.s
@@ -300,8 +270,7 @@ common/Polynomial.s: common/Polynomial.cpp.s
 
 # target to generate assembly for a file
 common/Polynomial.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Polynomial.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Polynomial.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Polynomial.cpp.s
 .PHONY : common/Polynomial.cpp.s
 
 common/Remez.o: common/Remez.cpp.o
@@ -309,8 +278,7 @@ common/Remez.o: common/Remez.cpp.o
 
 # target to build an object file
 common/Remez.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Remez.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Remez.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Remez.cpp.o
 .PHONY : common/Remez.cpp.o
 
 common/Remez.i: common/Remez.cpp.i
@@ -318,8 +286,7 @@ common/Remez.i: common/Remez.cpp.i
 
 # target to preprocess a source file
 common/Remez.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Remez.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Remez.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Remez.cpp.i
 .PHONY : common/Remez.cpp.i
 
 common/Remez.s: common/Remez.cpp.s
@@ -327,8 +294,7 @@ common/Remez.s: common/Remez.cpp.s
 
 # target to generate assembly for a file
 common/Remez.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/Remez.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/Remez.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/Remez.cpp.s
 .PHONY : common/Remez.cpp.s
 
 common/RemezApp.o: common/RemezApp.cpp.o
@@ -336,8 +302,7 @@ common/RemezApp.o: common/RemezApp.cpp.o
 
 # target to build an object file
 common/RemezApp.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/RemezApp.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/RemezApp.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/RemezApp.cpp.o
 .PHONY : common/RemezApp.cpp.o
 
 common/RemezApp.i: common/RemezApp.cpp.i
@@ -345,8 +310,7 @@ common/RemezApp.i: common/RemezApp.cpp.i
 
 # target to preprocess a source file
 common/RemezApp.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/RemezApp.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/RemezApp.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/RemezApp.cpp.i
 .PHONY : common/RemezApp.cpp.i
 
 common/RemezApp.s: common/RemezApp.cpp.s
@@ -354,8 +318,7 @@ common/RemezApp.s: common/RemezApp.cpp.s
 
 # target to generate assembly for a file
 common/RemezApp.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/RemezApp.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/RemezApp.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/RemezApp.cpp.s
 .PHONY : common/RemezApp.cpp.s
 
 common/func.o: common/func.cpp.o
@@ -363,8 +326,7 @@ common/func.o: common/func.cpp.o
 
 # target to build an object file
 common/func.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/func.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/func.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/func.cpp.o
 .PHONY : common/func.cpp.o
 
 common/func.i: common/func.cpp.i
@@ -372,8 +334,7 @@ common/func.i: common/func.cpp.i
 
 # target to preprocess a source file
 common/func.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/func.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/func.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/func.cpp.i
 .PHONY : common/func.cpp.i
 
 common/func.s: common/func.cpp.s
@@ -381,8 +342,7 @@ common/func.s: common/func.cpp.s
 
 # target to generate assembly for a file
 common/func.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/common/func.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/common/func.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/common/func.cpp.s
 .PHONY : common/func.cpp.s
 
 gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.o: gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.o
@@ -390,8 +350,7 @@ gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.o: gpt2-ckks/single-key/ckk
 
 # target to build an object file
 gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.o
 .PHONY : gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.o
 
 gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.i: gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.i
@@ -399,8 +358,7 @@ gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.i: gpt2-ckks/single-key/ckk
 
 # target to preprocess a source file
 gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.i
 .PHONY : gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.i
 
 gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.s: gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.s
@@ -408,8 +366,7 @@ gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.s: gpt2-ckks/single-key/ckk
 
 # target to generate assembly for a file
 gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.s
 .PHONY : gpt2-ckks/single-key/ckks_bootstrapping/Bootstrapper.cpp.s
 
 gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.o: gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.o
@@ -417,8 +374,7 @@ gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.o: gpt2-ckks/single-key/c
 
 # target to build an object file
 gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.o
 .PHONY : gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.o
 
 gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.i: gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.i
@@ -426,8 +382,7 @@ gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.i: gpt2-ckks/single-key/c
 
 # target to preprocess a source file
 gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.i
 .PHONY : gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.i
 
 gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.s: gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.s
@@ -435,8 +390,7 @@ gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.s: gpt2-ckks/single-key/c
 
 # target to generate assembly for a file
 gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.s
 .PHONY : gpt2-ckks/single-key/ckks_bootstrapping/ModularReducer.cpp.s
 
 gpt2-ckks/single-key/gpt2/Fold.o: gpt2-ckks/single-key/gpt2/Fold.cpp.o
@@ -444,8 +398,7 @@ gpt2-ckks/single-key/gpt2/Fold.o: gpt2-ckks/single-key/gpt2/Fold.cpp.o
 
 # target to build an object file
 gpt2-ckks/single-key/gpt2/Fold.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/Fold.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/Fold.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/Fold.cpp.o
 .PHONY : gpt2-ckks/single-key/gpt2/Fold.cpp.o
 
 gpt2-ckks/single-key/gpt2/Fold.i: gpt2-ckks/single-key/gpt2/Fold.cpp.i
@@ -453,8 +406,7 @@ gpt2-ckks/single-key/gpt2/Fold.i: gpt2-ckks/single-key/gpt2/Fold.cpp.i
 
 # target to preprocess a source file
 gpt2-ckks/single-key/gpt2/Fold.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/Fold.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/Fold.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/Fold.cpp.i
 .PHONY : gpt2-ckks/single-key/gpt2/Fold.cpp.i
 
 gpt2-ckks/single-key/gpt2/Fold.s: gpt2-ckks/single-key/gpt2/Fold.cpp.s
@@ -462,8 +414,7 @@ gpt2-ckks/single-key/gpt2/Fold.s: gpt2-ckks/single-key/gpt2/Fold.cpp.s
 
 # target to generate assembly for a file
 gpt2-ckks/single-key/gpt2/Fold.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/Fold.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/Fold.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/Fold.cpp.s
 .PHONY : gpt2-ckks/single-key/gpt2/Fold.cpp.s
 
 gpt2-ckks/single-key/gpt2/IterApprox.o: gpt2-ckks/single-key/gpt2/IterApprox.cpp.o
@@ -471,8 +422,7 @@ gpt2-ckks/single-key/gpt2/IterApprox.o: gpt2-ckks/single-key/gpt2/IterApprox.cpp
 
 # target to build an object file
 gpt2-ckks/single-key/gpt2/IterApprox.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/IterApprox.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/IterApprox.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/IterApprox.cpp.o
 .PHONY : gpt2-ckks/single-key/gpt2/IterApprox.cpp.o
 
 gpt2-ckks/single-key/gpt2/IterApprox.i: gpt2-ckks/single-key/gpt2/IterApprox.cpp.i
@@ -480,8 +430,7 @@ gpt2-ckks/single-key/gpt2/IterApprox.i: gpt2-ckks/single-key/gpt2/IterApprox.cpp
 
 # target to preprocess a source file
 gpt2-ckks/single-key/gpt2/IterApprox.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/IterApprox.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/IterApprox.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/IterApprox.cpp.i
 .PHONY : gpt2-ckks/single-key/gpt2/IterApprox.cpp.i
 
 gpt2-ckks/single-key/gpt2/IterApprox.s: gpt2-ckks/single-key/gpt2/IterApprox.cpp.s
@@ -489,8 +438,7 @@ gpt2-ckks/single-key/gpt2/IterApprox.s: gpt2-ckks/single-key/gpt2/IterApprox.cpp
 
 # target to generate assembly for a file
 gpt2-ckks/single-key/gpt2/IterApprox.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/IterApprox.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/IterApprox.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/IterApprox.cpp.s
 .PHONY : gpt2-ckks/single-key/gpt2/IterApprox.cpp.s
 
 gpt2-ckks/single-key/gpt2/MatrixMul.o: gpt2-ckks/single-key/gpt2/MatrixMul.cpp.o
@@ -498,8 +446,7 @@ gpt2-ckks/single-key/gpt2/MatrixMul.o: gpt2-ckks/single-key/gpt2/MatrixMul.cpp.o
 
 # target to build an object file
 gpt2-ckks/single-key/gpt2/MatrixMul.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/MatrixMul.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/MatrixMul.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/MatrixMul.cpp.o
 .PHONY : gpt2-ckks/single-key/gpt2/MatrixMul.cpp.o
 
 gpt2-ckks/single-key/gpt2/MatrixMul.i: gpt2-ckks/single-key/gpt2/MatrixMul.cpp.i
@@ -507,8 +454,7 @@ gpt2-ckks/single-key/gpt2/MatrixMul.i: gpt2-ckks/single-key/gpt2/MatrixMul.cpp.i
 
 # target to preprocess a source file
 gpt2-ckks/single-key/gpt2/MatrixMul.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/MatrixMul.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/MatrixMul.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/MatrixMul.cpp.i
 .PHONY : gpt2-ckks/single-key/gpt2/MatrixMul.cpp.i
 
 gpt2-ckks/single-key/gpt2/MatrixMul.s: gpt2-ckks/single-key/gpt2/MatrixMul.cpp.s
@@ -516,8 +462,7 @@ gpt2-ckks/single-key/gpt2/MatrixMul.s: gpt2-ckks/single-key/gpt2/MatrixMul.cpp.s
 
 # target to generate assembly for a file
 gpt2-ckks/single-key/gpt2/MatrixMul.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/MatrixMul.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/MatrixMul.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/MatrixMul.cpp.s
 .PHONY : gpt2-ckks/single-key/gpt2/MatrixMul.cpp.s
 
 gpt2-ckks/single-key/gpt2/PolyApprox.o: gpt2-ckks/single-key/gpt2/PolyApprox.cpp.o
@@ -525,8 +470,7 @@ gpt2-ckks/single-key/gpt2/PolyApprox.o: gpt2-ckks/single-key/gpt2/PolyApprox.cpp
 
 # target to build an object file
 gpt2-ckks/single-key/gpt2/PolyApprox.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/PolyApprox.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/PolyApprox.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/PolyApprox.cpp.o
 .PHONY : gpt2-ckks/single-key/gpt2/PolyApprox.cpp.o
 
 gpt2-ckks/single-key/gpt2/PolyApprox.i: gpt2-ckks/single-key/gpt2/PolyApprox.cpp.i
@@ -534,8 +478,7 @@ gpt2-ckks/single-key/gpt2/PolyApprox.i: gpt2-ckks/single-key/gpt2/PolyApprox.cpp
 
 # target to preprocess a source file
 gpt2-ckks/single-key/gpt2/PolyApprox.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/PolyApprox.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/PolyApprox.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/PolyApprox.cpp.i
 .PHONY : gpt2-ckks/single-key/gpt2/PolyApprox.cpp.i
 
 gpt2-ckks/single-key/gpt2/PolyApprox.s: gpt2-ckks/single-key/gpt2/PolyApprox.cpp.s
@@ -543,17 +486,39 @@ gpt2-ckks/single-key/gpt2/PolyApprox.s: gpt2-ckks/single-key/gpt2/PolyApprox.cpp
 
 # target to generate assembly for a file
 gpt2-ckks/single-key/gpt2/PolyApprox.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/PolyApprox.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/PolyApprox.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/PolyApprox.cpp.s
 .PHONY : gpt2-ckks/single-key/gpt2/PolyApprox.cpp.s
+
+gpt2-ckks/single-key/gpt2/optimize.o: gpt2-ckks/single-key/gpt2/optimize.cpp.o
+.PHONY : gpt2-ckks/single-key/gpt2/optimize.o
+
+# target to build an object file
+gpt2-ckks/single-key/gpt2/optimize.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/optimize.cpp.o
+.PHONY : gpt2-ckks/single-key/gpt2/optimize.cpp.o
+
+gpt2-ckks/single-key/gpt2/optimize.i: gpt2-ckks/single-key/gpt2/optimize.cpp.i
+.PHONY : gpt2-ckks/single-key/gpt2/optimize.i
+
+# target to preprocess a source file
+gpt2-ckks/single-key/gpt2/optimize.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/optimize.cpp.i
+.PHONY : gpt2-ckks/single-key/gpt2/optimize.cpp.i
+
+gpt2-ckks/single-key/gpt2/optimize.s: gpt2-ckks/single-key/gpt2/optimize.cpp.s
+.PHONY : gpt2-ckks/single-key/gpt2/optimize.s
+
+# target to generate assembly for a file
+gpt2-ckks/single-key/gpt2/optimize.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/optimize.cpp.s
+.PHONY : gpt2-ckks/single-key/gpt2/optimize.cpp.s
 
 gpt2-ckks/single-key/gpt2/pack.o: gpt2-ckks/single-key/gpt2/pack.cpp.o
 .PHONY : gpt2-ckks/single-key/gpt2/pack.o
 
 # target to build an object file
 gpt2-ckks/single-key/gpt2/pack.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/pack.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/pack.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/pack.cpp.o
 .PHONY : gpt2-ckks/single-key/gpt2/pack.cpp.o
 
 gpt2-ckks/single-key/gpt2/pack.i: gpt2-ckks/single-key/gpt2/pack.cpp.i
@@ -561,8 +526,7 @@ gpt2-ckks/single-key/gpt2/pack.i: gpt2-ckks/single-key/gpt2/pack.cpp.i
 
 # target to preprocess a source file
 gpt2-ckks/single-key/gpt2/pack.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/pack.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/pack.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/pack.cpp.i
 .PHONY : gpt2-ckks/single-key/gpt2/pack.cpp.i
 
 gpt2-ckks/single-key/gpt2/pack.s: gpt2-ckks/single-key/gpt2/pack.cpp.s
@@ -570,8 +534,7 @@ gpt2-ckks/single-key/gpt2/pack.s: gpt2-ckks/single-key/gpt2/pack.cpp.s
 
 # target to generate assembly for a file
 gpt2-ckks/single-key/gpt2/pack.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/pack.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/pack.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/pack.cpp.s
 .PHONY : gpt2-ckks/single-key/gpt2/pack.cpp.s
 
 gpt2-ckks/single-key/gpt2/test_util.o: gpt2-ckks/single-key/gpt2/test_util.cpp.o
@@ -579,8 +542,7 @@ gpt2-ckks/single-key/gpt2/test_util.o: gpt2-ckks/single-key/gpt2/test_util.cpp.o
 
 # target to build an object file
 gpt2-ckks/single-key/gpt2/test_util.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/test_util.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/test_util.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/test_util.cpp.o
 .PHONY : gpt2-ckks/single-key/gpt2/test_util.cpp.o
 
 gpt2-ckks/single-key/gpt2/test_util.i: gpt2-ckks/single-key/gpt2/test_util.cpp.i
@@ -588,8 +550,7 @@ gpt2-ckks/single-key/gpt2/test_util.i: gpt2-ckks/single-key/gpt2/test_util.cpp.i
 
 # target to preprocess a source file
 gpt2-ckks/single-key/gpt2/test_util.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/test_util.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/test_util.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/test_util.cpp.i
 .PHONY : gpt2-ckks/single-key/gpt2/test_util.cpp.i
 
 gpt2-ckks/single-key/gpt2/test_util.s: gpt2-ckks/single-key/gpt2/test_util.cpp.s
@@ -597,8 +558,7 @@ gpt2-ckks/single-key/gpt2/test_util.s: gpt2-ckks/single-key/gpt2/test_util.cpp.s
 
 # target to generate assembly for a file
 gpt2-ckks/single-key/gpt2/test_util.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/test_util.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/test_util.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/test_util.cpp.s
 .PHONY : gpt2-ckks/single-key/gpt2/test_util.cpp.s
 
 gpt2-ckks/single-key/gpt2/util.o: gpt2-ckks/single-key/gpt2/util.cpp.o
@@ -606,8 +566,7 @@ gpt2-ckks/single-key/gpt2/util.o: gpt2-ckks/single-key/gpt2/util.cpp.o
 
 # target to build an object file
 gpt2-ckks/single-key/gpt2/util.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/util.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/util.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/util.cpp.o
 .PHONY : gpt2-ckks/single-key/gpt2/util.cpp.o
 
 gpt2-ckks/single-key/gpt2/util.i: gpt2-ckks/single-key/gpt2/util.cpp.i
@@ -615,8 +574,7 @@ gpt2-ckks/single-key/gpt2/util.i: gpt2-ckks/single-key/gpt2/util.cpp.i
 
 # target to preprocess a source file
 gpt2-ckks/single-key/gpt2/util.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/util.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/util.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/util.cpp.i
 .PHONY : gpt2-ckks/single-key/gpt2/util.cpp.i
 
 gpt2-ckks/single-key/gpt2/util.s: gpt2-ckks/single-key/gpt2/util.cpp.s
@@ -624,57 +582,32 @@ gpt2-ckks/single-key/gpt2/util.s: gpt2-ckks/single-key/gpt2/util.cpp.s
 
 # target to generate assembly for a file
 gpt2-ckks/single-key/gpt2/util.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/gpt2-ckks/single-key/gpt2/util.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/gpt2-ckks/single-key/gpt2/util.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/gpt2-ckks/single-key/gpt2/util.cpp.s
 .PHONY : gpt2-ckks/single-key/gpt2/util.cpp.s
 
-run/run_approx_test.o: run/run_approx_test.cpp.o
-.PHONY : run/run_approx_test.o
+run/microbenchmark.o: run/microbenchmark.cpp.o
+.PHONY : run/microbenchmark.o
 
 # target to build an object file
-run/run_approx_test.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/run/run_approx_test.cpp.o
-.PHONY : run/run_approx_test.cpp.o
+run/microbenchmark.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/run/microbenchmark.cpp.o
+.PHONY : run/microbenchmark.cpp.o
 
-run/run_approx_test.i: run/run_approx_test.cpp.i
-.PHONY : run/run_approx_test.i
-
-# target to preprocess a source file
-run/run_approx_test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/run/run_approx_test.cpp.i
-.PHONY : run/run_approx_test.cpp.i
-
-run/run_approx_test.s: run/run_approx_test.cpp.s
-.PHONY : run/run_approx_test.s
-
-# target to generate assembly for a file
-run/run_approx_test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/approx_test.dir/build.make CMakeFiles/approx_test.dir/run/run_approx_test.cpp.s
-.PHONY : run/run_approx_test.cpp.s
-
-run/run_layer_test.o: run/run_layer_test.cpp.o
-.PHONY : run/run_layer_test.o
-
-# target to build an object file
-run/run_layer_test.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/run/run_layer_test.cpp.o
-.PHONY : run/run_layer_test.cpp.o
-
-run/run_layer_test.i: run/run_layer_test.cpp.i
-.PHONY : run/run_layer_test.i
+run/microbenchmark.i: run/microbenchmark.cpp.i
+.PHONY : run/microbenchmark.i
 
 # target to preprocess a source file
-run/run_layer_test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/run/run_layer_test.cpp.i
-.PHONY : run/run_layer_test.cpp.i
+run/microbenchmark.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/run/microbenchmark.cpp.i
+.PHONY : run/microbenchmark.cpp.i
 
-run/run_layer_test.s: run/run_layer_test.cpp.s
-.PHONY : run/run_layer_test.s
+run/microbenchmark.s: run/microbenchmark.cpp.s
+.PHONY : run/microbenchmark.s
 
 # target to generate assembly for a file
-run/run_layer_test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/layer_test.dir/build.make CMakeFiles/layer_test.dir/run/run_layer_test.cpp.s
-.PHONY : run/run_layer_test.cpp.s
+run/microbenchmark.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microbench.dir/build.make CMakeFiles/microbench.dir/run/microbenchmark.cpp.s
+.PHONY : run/microbenchmark.cpp.s
 
 # Help Target
 help:
@@ -684,8 +617,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... approx_test"
-	@echo "... layer_test"
+	@echo "... microbench"
 	@echo "... common/Choosemax.o"
 	@echo "... common/Choosemax.i"
 	@echo "... common/Choosemax.s"
@@ -731,6 +663,9 @@ help:
 	@echo "... gpt2-ckks/single-key/gpt2/PolyApprox.o"
 	@echo "... gpt2-ckks/single-key/gpt2/PolyApprox.i"
 	@echo "... gpt2-ckks/single-key/gpt2/PolyApprox.s"
+	@echo "... gpt2-ckks/single-key/gpt2/optimize.o"
+	@echo "... gpt2-ckks/single-key/gpt2/optimize.i"
+	@echo "... gpt2-ckks/single-key/gpt2/optimize.s"
 	@echo "... gpt2-ckks/single-key/gpt2/pack.o"
 	@echo "... gpt2-ckks/single-key/gpt2/pack.i"
 	@echo "... gpt2-ckks/single-key/gpt2/pack.s"
@@ -740,12 +675,9 @@ help:
 	@echo "... gpt2-ckks/single-key/gpt2/util.o"
 	@echo "... gpt2-ckks/single-key/gpt2/util.i"
 	@echo "... gpt2-ckks/single-key/gpt2/util.s"
-	@echo "... run/run_approx_test.o"
-	@echo "... run/run_approx_test.i"
-	@echo "... run/run_approx_test.s"
-	@echo "... run/run_layer_test.o"
-	@echo "... run/run_layer_test.i"
-	@echo "... run/run_layer_test.s"
+	@echo "... run/microbenchmark.o"
+	@echo "... run/microbenchmark.i"
+	@echo "... run/microbenchmark.s"
 .PHONY : help
 
 

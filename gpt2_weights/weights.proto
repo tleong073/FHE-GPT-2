@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package gpt2;
+
+option cc_enable_arenas = false;
+
+message Weight {
+
+    message Plaintext {
+        repeated float value = 1;
+    }
+
+  optional string name = 1;
+  repeated Plaintext plaintexts = 2;
+  repeated int32 dim = 3;
+}
+
+message Weights {
+  map<string,Weight> value = 1;
+}

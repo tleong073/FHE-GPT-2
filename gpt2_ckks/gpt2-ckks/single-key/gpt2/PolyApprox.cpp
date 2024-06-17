@@ -5,7 +5,7 @@
 /**
  * @brief Builds a log chebyshev basis up to 2N
  *		
- * Uses 3log(N)
+ * Uses log(N)
  * 
  * 
  * @param input The ciphertext to build the basis over
@@ -34,12 +34,14 @@ void build_cheby_basis(Ciphertext &input, vector<Ciphertext> &chebyBasis, int n,
 	chebyBasis.push_back(cipher);
     chebyBasis.push_back(input);
     cipher = input;
-    //printf("input scale+level: %f %zu\n",input.scale(),input.coeff_modulus_size());
+    printf("input scale+level: %f %zu\n",input.scale(),input.coeff_modulus_size());
 
     // 1 less depth used for t2 calculation
     evaluator.square_inplace(cipher);
     evaluator.relinearize_inplace(cipher,relin_keys);
     evaluator.rescale_to_next_inplace(cipher);
+
+    printf("line42 T2 scale+level: %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),input.scale(),input.coeff_modulus_size());
     /*
     evaluator.multiply_const_inplace(cipher,2.0);
     evaluator.rescale_to_next_inplace(cipher);
@@ -48,8 +50,8 @@ void build_cheby_basis(Ciphertext &input, vector<Ciphertext> &chebyBasis, int n,
 
     evaluator.add_const_inplace(cipher,-1.0);
     chebyBasis.push_back(cipher); // L-2
-    //printf("ChebyBasis T2 done\n");
-    //printf("line52 T2 scale+level: %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),input.scale(),input.coeff_modulus_size());
+    printf("ChebyBasis T2 done\n");
+    printf("line52 T2 scale+level: %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),input.scale(),input.coeff_modulus_size());
 
    // printf("line 60 T2 scale+level: %f %zu %f %zu\n",tmp_cipher.scale(),tmp_cipher.coeff_modulus_size(),cipher.scale(),cipher.coeff_modulus_size());
     Ciphertext tmp2;
@@ -57,17 +59,17 @@ void build_cheby_basis(Ciphertext &input, vector<Ciphertext> &chebyBasis, int n,
     // 2x
     evaluator.add(input,input,tmp2);
 
-    //2x* Tn-1
+    // 2x* Tn-1
     evaluator.multiply_reduced_error(tmp2,cipher,relin_keys,tmp_cipher);
-    //evaluator.relinearize_inplace(tmp_cipher,relin_keys);
+    // evaluator.relinearize_inplace(tmp_cipher,relin_keys);
     evaluator.rescale_to_next_inplace(tmp_cipher);
-    //printf("line 65 T2 scale+level: %f %zu %f %zu\n",tmp_cipher.scale(),tmp_cipher.coeff_modulus_size(),cipher.scale(),cipher.coeff_modulus_size());
+    // printf("line 65 T2 scale+level: %f %zu %f %zu\n",tmp_cipher.scale(),tmp_cipher.coeff_modulus_size(),cipher.scale(),cipher.coeff_modulus_size());
 
     
     evaluator.multiply_const(input,-1.0,tmp2);
     evaluator.rescale_to_next_inplace(tmp2);
 
-    //printf("T2 scale+level: %f %zu %f %zu\n",tmp_cipher.scale(),tmp_cipher.coeff_modulus_size(),tmp2.scale(),tmp2.coeff_modulus_size());
+    printf("T2 scale+level: %f %zu %f %zu\n",tmp_cipher.scale(),tmp_cipher.coeff_modulus_size(),tmp2.scale(),tmp2.coeff_modulus_size());
     //decrypt_and_print_and_max_round(tmp2,decryptor,encoder,1.0,0,5,5);
     evaluator.add_inplace_reduced_error(tmp_cipher,tmp2);
     chebyBasis.push_back(tmp_cipher); // L-4
@@ -77,12 +79,11 @@ void build_cheby_basis(Ciphertext &input, vector<Ciphertext> &chebyBasis, int n,
 	// Push back T1-Tn
 	for(int i = 0; i<n-2;i++) {
 		// 2T_{n}^2 - 1
-        //printf("Pre square %zu\n",cipher.coeff_modulus_size());
-        //printf("Pre square %f %zu\n",cipher.scale(),cipher.coeff_modulus_size());
+        printf("Pre square %f %zu\n",cipher.scale(),cipher.coeff_modulus_size());
 		evaluator.square_inplace(cipher);
 		evaluator.relinearize_inplace(cipher,relin_keys);
 		evaluator.rescale_to_next_inplace(cipher);
-        //printf("Post square %f %zu\n",cipher.scale(),cipher.coeff_modulus_size());
+        printf("Post square %f %zu\n",cipher.scale(),cipher.coeff_modulus_size());
         //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0,5,5);
         /*
 		evaluator.multiply_const_inplace(cipher,2.0);
@@ -121,8 +122,7 @@ void compute_sign_f(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     evaluator.rescale_to_next_inplace(output); // L+1
     //decrypt_and_print_and_max_round(cheby_basis[2],decryptor,encoder,1.0,0,5,5);
     //printf("First level complete1: %f %zu %f %zu\n",output.scale(),output.coeff_modulus_size(),cheby_basis[2].scale(),cheby_basis[2].coeff_modulus_size());
-    evaluator.multiply_const_inplace(output,1.0);
-    evaluator.rescale_to_next_inplace(output);
+
     //printf("First level complete2: %f %zu %f %zu\n",output.scale(),output.coeff_modulus_size(),cheby_basis[2].scale(),cheby_basis[2].coeff_modulus_size());
 
     evaluator.multiply_inplace_reduced_error(output,cheby_basis[2],relin_keys);
@@ -214,7 +214,7 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     // Compute Cheby basis
     vector<Ciphertext> cheby_basis;
     build_cheby_basis(input,cheby_basis,4,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-
+    printf("BUILT CHEBY BASIS\n");
     // Compute first level.
     double coeff_fq1 = -1.121704102;
     double coeff_fr1 =  1.978370667;
@@ -241,6 +241,7 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     //decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0,5,5);
     //printf("First level complete: %f %zu\n",output.scale(),output.coeff_modulus_size());
 
+    printf("FIRST LEVEL COMPLETE!\n");
     // Compute second level.
 
     double coeff_frq2_q = -0.6178588867;
@@ -250,7 +251,7 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     //decrypt_and_print_and_max_round(cheby_basis[3],decryptor,encoder,1.0,0,5,5);
     evaluator.multiply_const(cheby_basis[3],coeff_frq2_q,cipher);
     evaluator.rescale_to_next_inplace(cipher); // L+2
-    //printf("frq2 done!\n");
+    printf("frq2 done!\n");
 
     evaluator.multiply_const(input,coeff_frq2_r,tmp_cipher);//L+1
     //printf("fq2_q_0 done! %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),tmp_cipher.scale(),tmp_cipher.coeff_modulus_size());
@@ -259,7 +260,7 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
 
     //decrypt_and_print_and_max_round(tmp_cipher,decryptor,encoder,1.0,0,5,5);
     //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0,5,5);
-    //printf("fq2_q_0 done! %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),tmp_cipher.scale(),tmp_cipher.coeff_modulus_size());
+    printf("fq2_q_0 done! %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),tmp_cipher.scale(),tmp_cipher.coeff_modulus_size());
     evaluator.add_inplace_reduced_error(cipher,tmp_cipher); // L+2
     //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0,5,5);
     //printf("f2q done! %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),cheby_basis[3].scale(),cheby_basis[3].coeff_modulus_size());
@@ -269,17 +270,12 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
 
     //printf("modulus check %zu %zu\n",cipher.coeff_modulus_size(),cheby_basis[3].coeff_modulus_size());
     evaluator.multiply_inplace_reduced_error(cipher,cheby_basis[4],relin_keys); // L+3
-    //evaluator.relinearize_inplace(cipher,relin_keys);
     evaluator.rescale_to_next_inplace(cipher); // L+4
     //printf("fq2_q done! %f %zu\n",cipher.scale(),cipher.coeff_modulus_size());
     //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0,5,5);
     
-    
-
-    evaluator.multiply_const_inplace(output,1.0);
-    evaluator.rescale_to_next_inplace(output);
     //evaluator.mod_switch_to_inplace(output,cipher.parms_id());
-    //printf("fq3_q done! %f %zu %f %zu\n",output.scale(),output.coeff_modulus_size(),cipher.scale(),cipher.coeff_modulus_size());
+    printf("fq3_q done! %f %zu %f %zu\n",output.scale(),output.coeff_modulus_size(),cipher.scale(),cipher.coeff_modulus_size());
     // Compute fr3 = frq2*cheby[3] + fr2
     //decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0,5,5);
     evaluator.add_inplace_reduced_error(output,cipher); // L+4
@@ -309,10 +305,11 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     return;
 }
 
-// TODO: Replace with bootstrap once we have a significant amount of memory
-void sign_function(TensorCipher &inputs,TensorCipher &outputs, int df,int dg, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+
+void sign_function(TensorCipher &inputs,TensorCipher &outputs, int df,int dg, Bootstrapper &bootstrapper, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys)
 {
+    printf("COMPUTING G POLY\n");
     // Compute g(g(x))
     Ciphertext cipher,tmp_cipher;
     Plaintext plain;
@@ -322,17 +319,15 @@ void sign_function(TensorCipher &inputs,TensorCipher &outputs, int df,int dg, CK
     int i;
     for(i = 0;i < dg/2;i++){
         compute_sign_g(cipher,tmp_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-        fakeBootstrap(tmp_cipher,tmp_cipher, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
         compute_sign_g(tmp_cipher,cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
     }
 
     //printf("\nDONE WITH G2\n\n\n");
-    // ----------------------------------REMOVE WHEN ON BENCHMARK MACHINE-------------------------
-    fakeBootstrap(cipher, cipher, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
-    // ----------------------------------REMOVE WHEN ON BENCHMARK MACHINE-------------------------
+    if(cipher.coeff_modulus_size() < 8)
+        bootstrapper.bootstrap_full_real_3(cipher,cipher);
+    printf("COMPUTING F POLY");
     for(i=0;i<df/2;i++){
         compute_sign_f(cipher, tmp_cipher, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
-        fakeBootstrap(tmp_cipher,tmp_cipher, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
         compute_sign_f(tmp_cipher, cipher, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
     }
 
@@ -447,7 +442,9 @@ def exp(x,r):
 void compute_exp(Ciphertext &input,Ciphertext &output,int r, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys)
 {
+    printf(" START COMPUTING EXP\n");
     double power = pow(2,r);
+
     // Compute term to exponentiate
     evaluator.multiply_const(input,1/power,output);
     evaluator.rescale_to_next_inplace(output);
@@ -460,24 +457,20 @@ void compute_exp(Ciphertext &input,Ciphertext &output,int r, CKKSEncoder &encode
         evaluator.rescale_to_next_inplace(output);
         printf("SCALE: %f\n",output.scale());
     }
-
+    printf(" END COMPUTING EXP\n");
     return;
 }
 
-void compute_softmax(Ciphertext &input,int r, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+void compute_softmax(Ciphertext &input,int r,Bootstrapper &bootstrapper, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys)
 {   
     int i,j;
 
     Plaintext plain_ones,plain_zeros;
-    Ciphertext cipher,rolled,maxes,exps,sums,inverse;
+    Ciphertext cipher,rolled,maxes,exps,summed,inverses;
 
     vector<double> ones_mask(32768,0.0);
     vector<double> zeros_mask(32768,1.0);
-
-    encoder.encode(ones_mask,ENCODE_SCALE,plain_ones);
-    encoder.encode(zeros_mask,ENCODE_SCALE,plain_zeros);
-
 
     for(i=0;i<128;i++){
         for(j=0;j<128;j++){
@@ -486,25 +479,106 @@ void compute_softmax(Ciphertext &input,int r, CKKSEncoder &encoder, Encryptor &e
         }
     }
 
+    printf("About to prepare for max computation\n");
+
     // Prepare cipher for folding
-    evaluator.rotate_vector(input,32768-128,gal_keys,rolled);
+    evaluator.rotate_vector(input,-128,gal_keys,rolled);
     evaluator.add_inplace_reduced_error(input,rolled);
 
-    quickMax(input,maxes,128,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    quickMax(input,maxes,128,bootstrapper,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    printf("MAX RESULT: \n");
 
-    // Subtract out max
+    decrypt_and_print_and_max_round(maxes,decryptor,encoder,1.0,0);
+
+    Ciphertext bluh = input;
+
     evaluator.sub_inplace_reduced_error(input,maxes);
 
     // Compute exp and subtract out ones
     compute_exp(input,exps,6,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-    evaluator.sub_plain_inplace(input,plain_ones);
 
+    printf("After Exp\n");
+    //encoder.encode(ones_mask,exps.scale(),plain_ones);
+    encoder.encode(zeros_mask,exps.scale(),plain_zeros);
+    evaluator.mod_switch_to_inplace(plain_zeros,exps.parms_id());
+    evaluator.multiply_plain_inplace(exps,plain_zeros);
+    //evaluator.sub_plain_inplace(exps,plain_ones);
+
+    // fakeBootstrap(exps,exps,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+     
+    bootstrapper.bootstrap_full_real_3(rolled,exps);
+    
     // Compute sum
-    evaluator.rotate_vector(exps,32768-128,gal_keys,rolled);
-    quickSum(rolled,sums,128,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    evaluator.rotate_vector_inplace(rolled,-128,gal_keys);
+    evaluator.add_inplace_reduced_error(rolled,exps);
+    quickSum(rolled,summed,128,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    printf("After QuickSum\n");
+    decrypt_and_print_and_max_round(summed,decryptor,encoder,1.0,0);
 
+
+    Ciphertext cipher_in,cipher_out;
+    Plaintext plain;
+
+    // fakeBootstrap(summed,cipher_out,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
     // Goldschmidt division
-    compute_inverse(sums,inverse,4,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-    evaluator.multiply_reduced_error(exps,inverse,relin_keys,input);
+    compute_inverse(summed,inverses,4,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    evaluator.multiply_reduced_error(exps,inverses,relin_keys,input);
+    evaluator.rescale_to_next_inplace(input);
+}
 
+void compute_smax(Ciphertext &input,int r, int gamma, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys)
+{   
+    int i,j;
+
+    Plaintext plain_ones,plain_zeros,plain_gamma;
+    Ciphertext cipher,rolled,maxes,exps,summed,inverses;
+
+    vector<double> ones_mask(32768,0.0);
+    vector<double> zeros_mask(32768,1.0);
+    vector<double> gamma_mask(32768,0.0);
+
+    for(i=0;i<128;i++){
+        for(j=0;j<128;j++){
+            ones_mask[i*256+128+j] = 1.0;
+            zeros_mask[i*256+128+j] = 0.0;
+            gamma_mask[i*256+128+j] = -gamma;
+        }
+    }
+
+    Ciphertext bluh = input;
+
+    encoder.encode(gamma_mask,input.scale(),plain_gamma);
+    evaluator.mod_switch_to_inplace(plain_gamma,input.parms_id());
+    printf("About to prepare for max computation\n");
+
+    evaluator.add_plain_inplace(input,plain_gamma);
+
+    // Compute exp and subtract out ones
+    compute_exp(input,exps,6,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+    printf("After Exp\n");
+    //encoder.encode(ones_mask,exps.scale(),plain_ones);
+    encoder.encode(zeros_mask,exps.scale(),plain_zeros);
+    evaluator.mod_switch_to_inplace(plain_zeros,exps.parms_id());
+    evaluator.multiply_plain_inplace(exps,plain_zeros);
+    //evaluator.sub_plain_inplace(exps,plain_ones);
+
+    // fakeBootstrap(exps,exps,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    
+    // Compute sum
+    evaluator.rotate_vector(exps,-128,gal_keys,rolled);
+    evaluator.add_inplace_reduced_error(rolled,exps);
+    quickSum(rolled,summed,128,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    printf("After QuickSum\n");
+    decrypt_and_print_and_max_round(summed,decryptor,encoder,1.0,0);
+
+
+    Ciphertext cipher_in,cipher_out;
+    Plaintext plain;
+    // fakeBootstrap(summed,cipher_out,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    // Goldschmidt division
+    compute_inverse(summed,inverses,4,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    evaluator.multiply_reduced_error(exps,inverses,relin_keys,input);
+    evaluator.rescale_to_next_inplace(input);
 }

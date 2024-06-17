@@ -21,55 +21,81 @@ void quickSum(Ciphertext &input,Ciphertext &output,int n, CKKSEncoder &encoder, 
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) {
     
     Ciphertext cipher;
-    output=input;
+    cipher.reserve(16);
+    output.reserve(16);
     int acc = 1;
+    evaluator.rotate_vector(input,acc,gal_keys,output);
+    acc *= 2;
+
+
+    printf("Output \n");
+    decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0);
     printf("-----GAP-----\n");
-    for(int i = 0; i<floor(log2(n));i++) {
+    for(int i = 0; i<log2(n);i++) {
         printf("Folding2: %d %d %d\n",i,(int)(floor(log2(n))),acc);
         evaluator.rotate_vector(output,acc,gal_keys,cipher);
+        printf("Cipher \n");
+        decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0);
         evaluator.add_inplace_reduced_error(output,cipher);
-        acc *= 2;
         decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0);
+        acc *= 2;
     }
     return;
 }
 
-void computeMax(Ciphertext &input1,Ciphertext &input2,Ciphertext &output, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+// Computes max = 0.5*((a+b)*((a-b)*sign(a-b)))
+void computeMax(Ciphertext &input1,Ciphertext &input2,Ciphertext &output, Bootstrapper &bootstraper, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) {
-    Ciphertext cipher,diff_cipher,sign_cipher;
+    
+    printf("COMPUTING MAX\n");
+    Ciphertext cipher,diff_cipher,sign_cipher,normalized_diff;
     evaluator.sub(input1,input2,diff_cipher);
+    printf("Done WITH SUB\n");
+    evaluator.multiply_const(diff_cipher,0.1,normalized_diff);
+    evaluator.rescale_to_next_inplace(normalized_diff);
 
-    TensorCipher t = TensorCipher(diff_cipher);
+    TensorCipher t = TensorCipher(normalized_diff);
     TensorCipher out;
-
+    printf("COMPUTING SIGN: %zu\n",normalized_diff.coeff_modulus_size());
     sign_function(t,out,2,2,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
     sign_cipher = out.cipher();
-    fakeBootstrap(sign_cipher,sign_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    printf("DONE COMPUTING SIGN: %f\n",sign_cipher.scale());
+    //decrypt_and_print_and_max_round(sign_cipher,decryptor,encoder,1.0,0);
+    //decrypt_and_print_and_max_round(diff_cipher,decryptor,encoder,1.0,0);
 
     evaluator.multiply_inplace_reduced_error(diff_cipher,sign_cipher,relin_keys);
     evaluator.rescale_to_next_inplace(diff_cipher);
 
+    //decrypt_and_print_and_max_round(diff_cipher,decryptor,encoder,1.0,0);
+
     evaluator.add_inplace_reduced_error(diff_cipher,input1);
     evaluator.add_inplace_reduced_error(diff_cipher,input2);
 
+    //decrypt_and_print_and_max_round(diff_cipher,decryptor,encoder,1.0,0);
     evaluator.multiply_const(diff_cipher,0.5,output);
     evaluator.rescale_to_next_inplace(output);
+    //decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0);
 
     return;
 }
 
-void quickMax(Ciphertext &input,Ciphertext &output,int n, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+// Assume input is formatted for fold
+void quickMax(Ciphertext &input,Ciphertext &output,int n, Bootstrapper &bootstrapper,CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) {
-    Ciphertext cipher = input,rot_cipher;
-
-    evaluator.rotate_vector(cipher,-n,gal_keys,rot_cipher);
-    evaluator.add_inplace(cipher,rot_cipher);
+    Ciphertext cipher = input,rot_cipher,tmp_cipher;
 
     int acc = 1;
     for(int i = 0; i<log2(n);i++) {
-        evaluator.rotate_vector(cipher,acc,gal_keys,rot_cipher);
-        computeMax(cipher,rot_cipher,cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-        fakeBootstrap(cipher,cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        tmp_cipher=cipher;
+        if(tmp_cipher.coeff_modulus_size() <= 13){
+            while(cipher.coeff_modulus_size() > 1){
+			    evaluator.mod_switch_to_next_inplace(cipher);
+            }
+            bootstrapper.bootstrap_full_real_3(cipher,tmp_cipher);
+        }
+            
+        evaluator.rotate_vector(tmp_cipher,acc,gal_keys,rot_cipher);
+        computeMax(tmp_cipher,rot_cipher,cipher,bootstrapper,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
         acc *= 2;
     }
     output = cipher;

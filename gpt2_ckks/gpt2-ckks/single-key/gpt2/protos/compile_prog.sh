@@ -1,0 +1,1 @@
+g++ -I/usr/include/google  -L/usr/lib/x86_64-linux-gnu/ -o $1 addressbook.pb.cc $2.cc -lprotobuf

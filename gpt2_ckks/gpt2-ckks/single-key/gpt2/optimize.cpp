@@ -35,6 +35,6 @@ void augment_value_col(vc& A,vc& cached_val,int padded_row_size,int idx,
     for(i=0;i<A.size();i++){
         evaluator.multiply_plain_inplace(cached_val[i],plain);
         evaluator.rotate_vector_inplace(A[i],idx,gal_keys);
-        evaluator.add_inplace_reduced_error(A[i],cached_val);
+        evaluator.add_inplace_reduced_error(A[i],cached_val[i]);
     }
 }

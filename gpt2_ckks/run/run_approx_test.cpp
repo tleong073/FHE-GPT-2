@@ -20,11 +20,11 @@ long logn_1 = 14;	// sparse slots
 long logn_2 = 13;
 long logn_3 = 12;
 int logp = LOGP;
-int logq = 50;
+int logq = 51;
 int log_special_prime = 60;
 int log_integer_part = logq - logp - loge + 5;
 int remaining_level = 10; // Calculation required
-int boot_level = 1; // 
+int boot_level = 14; // 
 int total_level = remaining_level + boot_level;
 
 
@@ -276,7 +276,7 @@ TEST_SUITE("MatrixMul") {
        
 
         Config conf;
-        row_matrix_multiplication_seal(A1_cipher,A2_cipher,zero_cipher,output,8,2048,2048,8,conf,
+        row_matrix_multiplication_seal(A1_cipher,A2_cipher,zero_cipher,output,8,2048,2048,8,
                         encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
         printf("Done with matmul\n");
 
@@ -334,7 +334,11 @@ TEST_SUITE("MatrixMul") {
         printf("Done packing into ciphertexts: A1: %zu  A2: %zu\n",A1_cipher.size(),A2_cipher.size());
 
         Config conf;
-        attn_proj_row_seal(A1_cipher,A2_cipher,output,16,1024,1024,16,conf,
+        vec zeros(32768,0.0);
+        Ciphertext bias;
+        encoder.encode(zeros,ENCODE_SCALE,plain);
+        encryptor.encrypt(plain,bias);
+        attn_proj_row_seal(A1_cipher,A2_cipher,bias,output,16,1024,1024,16,
                                 encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
         printf("Done with matmul\n");
 
@@ -484,7 +488,8 @@ TEST_SUITE("IterApprox") {
         Plaintext plain;
         Ciphertext cipher_in,cipher_out;
 
-        vector<double> v = {0.0035,0.4,0.67};
+        vector<double> v = {0.0035,0.4,0.67,2.23284};
+        v.resize(32768,2.0);
         encoder.encode(v, scale, plain);
         encryptor.encrypt(plain,cipher_in);
 
@@ -615,7 +620,7 @@ TEST_SUITE("Fold") {
         TensorCipher tensor1;
         TensorCipher tensor2;
 
-        vector<double> v = {.1,.2,.3,.4,.5,.6,.7,.8};
+        vector<double> v = {.1,.2,.3,.4,.5,.6,.7,.8,.1,.2,.3,.4,.5,.6,.7,.8};
         encoder.encode(v, scale, plain);
 
         encryptor.encrypt(plain,cipher);
@@ -630,6 +635,86 @@ TEST_SUITE("Fold") {
         for(int i = 0; i<v_expect.size();i++) {
             CHECK(doctest::Approx(v_res[i]) == v_expect[i]);
         }
+    }
+
+    TEST_CASE("Softmax") {
+
+        INIT();
+
+        Plaintext plain;
+        Ciphertext cipher,out_cipher;
+
+        vector<double> v = {1,2,3,4,5};
+        vec out(5,0.0);
+        encoder.encode(v, scale, plain);
+        encryptor.encrypt(plain,cipher);
+
+        compute_softmax_plain(v,out);
+
+        compute_softmax(cipher,6,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+        decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0);
+
+    }
+
+    TEST_CASE("LayerNorm") {
+
+        INIT();
+
+        Plaintext plain;
+        Ciphertext cipher,out_cipher;
+
+        vector<double> v = {.1,.2,.3,.4,.5};
+        vec out(5,0.0);
+        encoder.encode(v, scale, plain);
+        encryptor.encrypt(plain,cipher);
+
+        compute_softmax_plain(v,out);
+        vec gamma(768,1.0);
+        vec beta(768,1.0);
+
+        compute_layernorm(cipher,out_cipher,gamma,beta,768,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+        decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0);
+
+    }
+
+}
+
+TEST_SUITE("Bootstrap") {
+
+    TEST_CASE("SingleBootstrap") {
+
+        INIT();
+
+        Plaintext plain;
+        Ciphertext cipher,rtn;
+
+        vector<double> v = {0.4,0.5};
+        encoder.encode(v, scale, plain);
+
+        encryptor.encrypt(plain,cipher);
+        int i;
+        for(i=0;i<total_level;i++){
+            evaluator.square_inplace(cipher);
+            evaluator.relinearize_inplace(cipher,relin_keys);
+            evaluator.rescale_to_next_inplace(cipher);
+            printf("Hello: %zu\n",cipher.coeff_modulus_size());
+        }
+        
+
+        Bootstrapper bootstrapper_1(loge, logn_1, logN - 1, total_level, scale, boundary_K, boot_deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, evaluator, relin_keys, gal_keys);
+        bootstrapper_1.prepare_mod_polynomial();
+        bootstrapper_1.addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
+        bootstrapper_1.generate_LT_coefficient_3();
+        bootstrapper_1.bootstrap_real_3(rtn,cipher);
+
+        vector<double> v_mod;
+        decryptor.decrypt(rtn,plain);
+        encoder.decode(plain, v_mod);
+        
+        CHECK(v[0]*v[0] == doctest::Approx(v_mod[0]));
+        CHECK(v[1]*v[1] == doctest::Approx(v_mod[1]));
     }
 
 }

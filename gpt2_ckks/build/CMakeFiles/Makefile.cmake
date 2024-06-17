@@ -61,6 +61,5 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/approx_test.dir/DependInfo.cmake"
-  "CMakeFiles/layer_test.dir/DependInfo.cmake"
+  "CMakeFiles/microbench.dir/DependInfo.cmake"
   )

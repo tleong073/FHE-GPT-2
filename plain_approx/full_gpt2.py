@@ -3,8 +3,12 @@ import attn
 import layers
 import pack
 import torch
+import sys
 
 import gpt2_approx_checkpoint_2 as gpt2_ref
+
+sys.path.append("/home/tmleong/FHE-GPT-2/gpt2_weights")
+import weights_pb2
 
 # Preprocessing required to transform raw input data into form that can be used as input
 
@@ -14,13 +18,13 @@ def gpt2_setup(tokens,config,weights):
 
     # Directly embed using embedding layer
     embedded= None
-    embedding_layer = gpt2_ref.EmbeddingLayer(config,weights)
-    with torch.no_grad():
-        embedded = embedding_layer(tokens)
+    if tokens is not None:
+        embedding_layer = gpt2_ref.EmbeddingLayer(config,weights)
+        with torch.no_grad():
+            embedded = embedding_layer(tokens)[0].cpu().detach().numpy()
     
     w_out,b_out = torch.randn((768,768)), torch.randn((768,)) / 1000
 
-    
 
     new_weights = {}
     # Convert Weights into the appropriate format for each layer
@@ -62,7 +66,16 @@ def gpt2_setup(tokens,config,weights):
         elif "mlp.c_proj.bias" in k:
             new_weights[k] = pack.expand_bias(v)
     
-    return embedded[0].cpu().detach().numpy(),new_weights
+    mask = torch.tril(torch.ones((config.max_len, config.max_len)))
+    mask2 = torch.triu(torch.ones((config.max_len, config.max_len)),diagonal=1)
+    
+    mask_packed = pack.pack_from_row(mask2)
+    ex_mask_packed = pack.pack_from_row(mask)
+
+    new_weights['mask'] = mask_packed
+
+
+    return embedded,new_weights
             
 # End-to-End GPT-2 Inference
 # Assumes Pre-embedded input
@@ -140,3 +153,38 @@ def gpt2_inference(embed_in,config,weights):
                                     768,1.1047115e+10)
     return out
 
+if __name__ == "__main__":
+    print("Parsing weights into a protobuf")
+
+    arr=np.array([1,2,3])
+    _,new_weights = gpt2_setup(None,gpt2_ref.config,gpt2_ref.weights)
+
+    w = weights_pb2.Weights()
+    i=0
+    for k,v in new_weights.items():
+        i+=1
+        print(k,type(v),len(v.shape))
+        w.value[k].name=k
+        if len(v.shape) > 1:
+            for ele in v:
+                f = weights_pb2.Weight.Plaintext()
+                f.value.extend(ele)
+                w.value[k].plaintexts.append(f)
+        else:
+            f = weights_pb2.Weight.Plaintext()
+            f.value.extend(v)
+            w.value[k].plaintexts.append(f)
+        
+        w.value[k].dim.extend(list(v.shape))
+
+    pb_name = '../gpt2_weights/all_gpt2_weights.pb'
+
+    with open(pb_name,'wb') as f:
+        f.write(w.SerializeToString())
+    
+    if len(sys.argv) > 1 and sys.argv[1] == 'test':
+        W = weights_pb2.Weights()
+        with open(pb_name,'rb') as g:
+            W.ParseFromString(g.read())
+        for k,v in W.value.items():
+            print(k,v.dim)

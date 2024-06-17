@@ -15,9 +15,12 @@
 ########################
 
 //Build comparison operation
-APPROX_TEST:BOOL=ON
+APPROX_TEST:BOOL=OFF
 
-//Build comparison operation
+//Build benhcmark configuration
+BENCH:BOOL=OFF
+
+//Build boot operation
 BOOT:BOOL=OFF
 
 //Path to a program.
@@ -154,7 +157,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=cnn_ckks_project
+CMAKE_PROJECT_NAME:STATIC=gpt2_ckks_project
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -225,19 +228,22 @@ CNN:BOOL=OFF
 COMP:BOOL=OFF
 
 //Build comparison operation
-LAYER_TEST:BOOL=ON
+LAYER_TEST:BOOL=OFF
+
+//Build microbenchmark configuration
+MICROBENCH:BOOL=ON
 
 //The directory containing a CMake configuration file for SEAL.
 SEAL_DIR:PATH=/usr/local/lib/cmake/SEAL-3.6
 
 //Value Computed by CMake
-cnn_ckks_project_BINARY_DIR:STATIC=/home/tmleong/FHE-GPT-2/gpt2_ckks/build
+gpt2_ckks_project_BINARY_DIR:STATIC=/home/tmleong/FHE-GPT-2/gpt2_ckks/build
 
 //Value Computed by CMake
-cnn_ckks_project_IS_TOP_LEVEL:STATIC=ON
+gpt2_ckks_project_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
-cnn_ckks_project_SOURCE_DIR:STATIC=/home/tmleong/FHE-GPT-2/gpt2_ckks
+gpt2_ckks_project_SOURCE_DIR:STATIC=/home/tmleong/FHE-GPT-2/gpt2_ckks
 
 
 ########################

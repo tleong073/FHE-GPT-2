@@ -60,6 +60,95 @@ void pack_tight(vector<Ciphertext> &input,vector<Ciphertext> &output, CKKSEncode
                             return;
                         }
 
+/*
+def unpack_tight(arr):
+    assert len(arr) == 3
+    x = np.zeros((8,32768))
+    src_idx = 0
+    dst_idx = 0
+    while src_idx < 32768*3:
+        print(f"dst_idx: {dst_idx} src_idx: {src_idx}")
+        masked_out = mask_out(arr[src_idx // 32768],(src_idx % 32768,768))
+
+        shift_amt = (dst_idx % 32768) - (src_idx % 32768)
+        x[dst_idx // 32768] += np.roll(masked_out,shift_amt)
+        
+        src_idx += 768
+        dst_idx += 2048
+
+        leftover = 32768 - (src_idx % 32768)
+        if leftover < 768: 
+            # Put remaining chunks into array
+            print(dst_idx // 32768,src_idx // 32768,dst_idx % 32768)
+            masked_out = mask_out(arr[src_idx // 32768],(src_idx % 32768,leftover))
+            shift_amt = (dst_idx % 32768) - (src_idx % 32768)
+            x[dst_idx // 32768] += np.roll(masked_out,shift_amt)
+
+            src_idx += leftover
+            dst_idx += leftover
+
+            # Fill in remaining row
+            print(dst_idx // 32768,src_idx // 32768,dst_idx % 32768)
+            masked_out = mask_out(arr[src_idx // 32768],(src_idx % 32768,768-leftover))
+            shift_amt = (dst_idx % 32768) - (src_idx % 32768)
+            x[dst_idx // 32768] += np.roll(masked_out,shift_amt)
+
+            src_idx += 768-leftover
+            dst_idx += 2048-leftover
+    return x
+*/
+// Assume outputs are preformatted
+void unpack_tight(vector<Ciphertext> &input,vector<Ciphertext> &output, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys)
+{
+    int src_idx = 0;
+    int dst_idx = 0;
+    int shift_amt;
+
+    Ciphertext cipher,rolled;
+
+    while (src_idx < 32768 * 3) {
+        std::cout << "dst_idx: " << dst_idx << " src_idx: " << src_idx << std::endl;
+        //std::vector<double> masked_out = mask_out(arr[src_idx / 32768], {src_idx % 32768, 768});
+        mask_out(input[src_idx/32768],cipher,src_idx % 32768,768,encoder,evaluator,relin_keys);
+        shift_amt =  (src_idx % 32768) - (dst_idx % 32768);
+        evaluator.rotate_vector(cipher,shift_amt,gal_keys,rolled);
+
+        evaluator.add_inplace_reduced_error(output[dst_idx /32768],rolled);
+
+        src_idx += 768;
+        dst_idx += 2048;
+
+        int leftover = 32768 - (src_idx % 32768);
+        if (leftover < 768) {
+            std::cout << dst_idx / 32768 << " " << src_idx / 32768 << " " << dst_idx % 32768 << std::endl;
+
+            mask_out(input[src_idx/32768],cipher,src_idx % 32768,leftover,encoder,evaluator,relin_keys);
+            
+            shift_amt =  (src_idx % 32768) - (dst_idx % 32768);
+            
+            evaluator.rotate_vector(cipher,shift_amt,gal_keys,rolled);
+            evaluator.add_inplace_reduced_error(output[dst_idx / 32768],rolled);
+
+            src_idx += leftover;
+            dst_idx += leftover;
+
+            std::cout << dst_idx / 32768 << " " << src_idx / 32768 << " " << dst_idx % 32768 << std::endl;
+            mask_out(input[src_idx/32768],cipher,src_idx % 32768,2048-leftover,encoder,evaluator,relin_keys);
+            
+            shift_amt =  (src_idx % 32768) - (dst_idx % 32768);
+            
+            evaluator.rotate_vector(cipher,shift_amt,gal_keys,rolled);
+            evaluator.add_inplace_reduced_error(output[dst_idx / 32768],rolled);
+
+            src_idx += 768 - leftover;
+            dst_idx += 2048 - leftover;
+        }
+    }
+
+    return;
+}
+
 // Only works in 2-D matrices. Assume out is prepared as packed 0 ciphertexts
 void pack_from_row(vector<vector<double>> &input, vector<Ciphertext> &output, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) {

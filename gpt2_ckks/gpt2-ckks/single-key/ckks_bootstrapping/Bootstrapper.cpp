@@ -2243,6 +2243,7 @@ void Bootstrapper::rotated_nobsgs_linear_transform(Ciphertext &rtncipher, Cipher
         giantct = new Ciphertext();
         *giantct = tmptmpct;
 		if(i != 0) {
+            printf("ROTATION: %d %d\n",i,totlen);
 			evaluator.rotate_vector(*giantct, i, gal_keys, tmptmpct);
 			if(tmpct == 0){
 				tmpct = new Ciphertext;
@@ -2287,7 +2288,9 @@ void Bootstrapper::sflinv_one_depth(Ciphertext &rtncipher, Ciphertext &cipher) {
 
 void Bootstrapper::sflinv_one_depth_more_depth(Ciphertext &rtncipher, Ciphertext &cipher) {
 	int totlen1 = (1 << logn) - 1;
+    printf(" BEFORE SDADS\n");
     rotated_nobsgs_linear_transform(rtncipher, cipher, totlen1, logn, invfftcoeff1[slot_index]);
+    printf("SDADS\n");
 }
 void Bootstrapper::sfl(Ciphertext &rtncipher, Ciphertext &cipher) {
 	int split_point = floor(logn / 2.0);
@@ -2695,12 +2698,15 @@ void Bootstrapper::slottocoeff_half_3(Ciphertext &rtncipher, Ciphertext &cipher)
 
 void Bootstrapper::coefftoslot_full_3(Ciphertext &rtncipher1, Ciphertext &rtncipher2, Ciphertext &cipher) {
 	Ciphertext tmpct1, tmpct2, tmpct3, tmpct4, tmpct5;
+    printf("About to sflinv\n");
 	sflinv_full_3(tmpct1, cipher);
 	complex<double> iunit(0.0, 1.0);
 	vector<complex<double>> tmpvec(Nh, 0);
 	for (int i = 0; i < Nh; i++) {
         tmpvec[i] -= iunit;
     }
+
+    printf("After tmpvec\n");
     Plaintext tmpplain;
     encoder.encode(tmpvec, 1.0, tmpplain);
     evaluator.mod_switch_to_inplace(tmpplain, tmpct1.parms_id());
@@ -2883,7 +2889,7 @@ void Bootstrapper::coefftoslot_full_mul_first(Ciphertext &rtncipher1, Ciphertext
 			tmpvec_1[i * (2 * n) + j + n] = 0.5; 
 		}
 	}
-
+    
 	evaluator.multiply_vector_reduced_error(tmpct1, tmpvec_1, tmpct3);
 	evaluator.complex_conjugate(tmpct2, gal_keys, tmpct4);
 	evaluator.complex_conjugate(tmpct3, gal_keys, tmpct5);
@@ -3243,7 +3249,7 @@ void Bootstrapper::bootstrap_full_real_3(Ciphertext &rtncipher, Ciphertext &ciph
 	const auto &modulus = iter(context.first_context_data()->parms().coeff_modulus());
 	cipher.scale() = ((double)modulus[0].value());
 
-	cout << "Coefftoslot..." << endl;
+	cout << "Coefftoslot...dsadfd" << endl;
 	Ciphertext rtn1, rtn2;
 	coefftoslot_full_3(rtn1, rtn2, cipher);
 

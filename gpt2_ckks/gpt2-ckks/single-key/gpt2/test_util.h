@@ -1,8 +1,26 @@
 #pragma once
 
+#include "util.h"
+
 #include<vector>
 
 using namespace std;
+
+enum TestType {
+    ATTN_PROJ_ROW,
+    QK_MATMUL,
+    SV_MATMUL,
+    SOFTMAX,
+    GELU,
+    LAYERNORM,
+    BOOTSTRAP
+};
+
+typedef struct test_entry{
+    string name;
+    string description;
+    TestType type;
+} test_entry_t;
 
 // Assume |v1| == |v2|
 //double dot_prod(vector<double> &v1, vector<double> &v2);
@@ -18,3 +36,12 @@ void compute_exp_plain(vector<double> &A);
 
 // Compute numberically stable softmax plain
 void compute_softmax_plain(vector<double> &A,vector<double> &out);
+
+// Randomly generate random numbers matching an input dimension
+void generate_random(vector<vector<double>> &v);
+
+// Adds descriptions of micorbenchmarks
+void populate_tests(map<int,test_entry_t> &tests);
+
+// Prints microbenchmark descriptions
+void print_tests(map<int,test_entry_t> &tests);

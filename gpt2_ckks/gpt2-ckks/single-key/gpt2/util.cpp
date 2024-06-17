@@ -265,7 +265,7 @@ void fakeBootstrap(Ciphertext &input, Ciphertext &output, CKKSEncoder &encoder, 
 
 	decryptor.decrypt(input,plain);
 	encoder.decode(plain, res);
-	encoder.encode(res, pow(2,51),plain);
+	encoder.encode(res, ENCODE_SCALE,plain);
 	encryptor.encrypt(plain, output);
 }
 
@@ -291,11 +291,9 @@ void mask_out(Ciphertext &cipher,Ciphertext &out, int start,int length,CKKSEncod
     fill(x.begin()+start,x.begin()+start+length,1.0);
 	printf("mask_out start: %d length: %d \n",start,length);
 
-    encoder.encode(x, ENCODE_SCALE,plain);
 	
-    evaluator.multiply_plain(cipher,plain,out);
+    evaluator.multiply_vector_reduced_error(cipher,x,out);
 	printf("mask_out mul done : %d\n",out.is_transparent());
-    evaluator.relinearize_inplace(out,relin_keys);
     evaluator.rescale_to_next_inplace(out);
 }
 
@@ -311,5 +309,9 @@ void pack_plain_row(vector<vector<double>>& v,int rows,int row_size,vector<vecto
 			out[pos / 32768][pos % 32768] = v[i][j];
 		}
 	}
+	return;
+}
+
+void add_galois_keys(vector<double>&gal_steps_vector) {
 	return;
 }

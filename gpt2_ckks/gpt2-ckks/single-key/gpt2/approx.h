@@ -1,4 +1,6 @@
 #include "util.h"
+#include "pack.h"
+#include "Bootstrapper.h"
 
 // Matrix related functions
 
@@ -11,8 +13,8 @@ void decrypt_and_print(const Ciphertext &cipher, Decryptor &decryptor, CKKSEncod
 void row_matrix_multiplication_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
 	int A_rows, int A_cols,int W_rows,int W_cols, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
 
-void attn_proj_row_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &weights,Ciphertext bias, vector<Ciphertext> &outputs,int A_rows, int A_cols,int W_rows,int W_cols,
-	 CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
+void attn_proj_row_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
 
 void attn_proj_col_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
 	int A_rows, int A_cols,int W_rows,int W_cols, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
@@ -61,17 +63,20 @@ void compute_inv_sqrt(Ciphertext &input,Ciphertext &output,int iters,double gues
 void quickSum(Ciphertext &input,Ciphertext &output,int n, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys);
 
-void computeMax(Ciphertext &input1,Ciphertext &input2,Ciphertext &output, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+void computeMax(Ciphertext &input1,Ciphertext &input2,Ciphertext &output, Bootstrapper &bootstraper, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys);
 
-void quickMax(Ciphertext &input,Ciphertext &output,int n, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+void quickMax(Ciphertext &input,Ciphertext &output,int n, Bootstrapper &bootstrapper,CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys);
 
 // Compound Non-linear functions
-void compute_softmax(Ciphertext &input,int r, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+void compute_softmax(Ciphertext &input,int r,Bootstrapper &bootstrapper, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys);
 
-void compute_layernorm(Ciphertext &input,Ciphertext &output,int gamma,int beta,int row_size, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+void compute_smax(Ciphertext &input,int r,int gamma, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys);
+
+void compute_layernorm(Ciphertext &input,Ciphertext &output,vector<double> gamma,vector<double> beta,int row_size, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys);
 
 
@@ -79,9 +84,7 @@ void compute_layernorm(Ciphertext &input,Ciphertext &output,int gamma,int beta,i
 void FeedForwardLayer( vector<Ciphertext>&A,vector<Ciphertext> W1,vector<Ciphertext> b1,vector<Ciphertext> W2,vector<Ciphertext> b2,vector<Ciphertext> &outputs,
 	 CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
 
-void attentionLayer( vector<Ciphertext>&A,vector<Ciphertext>&qw,vector<Ciphertext>&qb,vector<Ciphertext>&kw,vector<Ciphertext>&kb,
-						vector<Ciphertext>&vw,vector<Ciphertext>&vb,vector<Ciphertext>&w_out,vector<Ciphertext>&b_out,Ciphertext mask,vector<Ciphertext>& kv_cache,
-						vector<Ciphertext> &outputs, int rows, int cols, int idx,
+void attentionLayer( vc&A,vc&qw, Ciphertext qb,vc&kw,Ciphertext kb,vc&vw,Ciphertext vb,vc&w_out,Ciphertext &b_out,Ciphertext mask,vector<vc>& kv_cache,vc &outputs, int rows, int cols, int idx,
 						CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
 
 // KV cache optimizations

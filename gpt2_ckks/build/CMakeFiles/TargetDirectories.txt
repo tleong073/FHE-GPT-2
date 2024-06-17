@@ -1,5 +1,4 @@
-/home/tmleong/FHE-GPT-2/gpt2_ckks/build/CMakeFiles/approx_test.dir
-/home/tmleong/FHE-GPT-2/gpt2_ckks/build/CMakeFiles/layer_test.dir
+/home/tmleong/FHE-GPT-2/gpt2_ckks/build/CMakeFiles/microbench.dir
 /home/tmleong/FHE-GPT-2/gpt2_ckks/build/CMakeFiles/edit_cache.dir
 /home/tmleong/FHE-GPT-2/gpt2_ckks/build/CMakeFiles/rebuild_cache.dir
 /home/tmleong/FHE-GPT-2/gpt2_ckks/build/common/CMakeFiles/edit_cache.dir
