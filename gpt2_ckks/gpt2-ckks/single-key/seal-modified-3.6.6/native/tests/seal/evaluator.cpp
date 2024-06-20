@@ -34,7 +34,8 @@ namespace sealtest
         keygen.create_public_key(pk);
 
         Encryptor encryptor(context, pk);
-        Evaluator evaluator(context);
+        CKKSEncoder encoder(context);
+        Evaluator evaluator(context,encoder);
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext encrypted;

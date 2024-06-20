@@ -1967,6 +1967,7 @@ void Bootstrapper::bsgs_linear_transform(Ciphertext &rtncipher, Ciphertext &ciph
 	Ciphertext addtmp1, addtmp2;
 	
 	for(int i = basicstart1; i < basicstart1 + gs1; i++) {
+        printf("ABOUT TO ROT2: %d\n",(Nh + i * basicstep) % Nh);
 		if(i == 0) babyct[i - basicstart1] = cipher; 
 		else evaluator.rotate_vector(cipher, (Nh + i * basicstep) % Nh, gal_keys, babyct[i - basicstart1]);
 	}
@@ -1997,6 +1998,7 @@ void Bootstrapper::bsgs_linear_transform(Ciphertext &rtncipher, Ciphertext &ciph
 		}
 
 		if(i != 0) {
+            printf("ABOUT TO ROT3: %d\n", (Nh + i * gs1 * basicstep) % Nh);
 			evaluator.rotate_vector(giantct, (Nh + i * gs1 * basicstep) % Nh, gal_keys, tmptmpct);
 			if(!tmpctbool){
 				tmpct = tmptmpct;
@@ -2036,6 +2038,7 @@ void Bootstrapper::rotated_bsgs_linear_transform(Ciphertext &rtncipher, Cipherte
 			babyct[i] = cipher;
 		}
 		else {
+            printf("ABOUT TO ROT: %d\n",(Nh + i * basicstep) % Nh);
 			evaluator.rotate_vector(cipher, (Nh + i * basicstep) % Nh, gal_keys, babyct[i]);
 		}
 	}
@@ -2066,6 +2069,7 @@ void Bootstrapper::rotated_bsgs_linear_transform(Ciphertext &rtncipher, Cipherte
 		}
 
 		if(i != 0) {
+            printf("ABOUT TO ROT2: %d\n",(Nh + i * gs2 * basicstep) % Nh);
 			evaluator.rotate_vector(giantct, (Nh + i * gs2 * basicstep) % Nh, gal_keys, tmptmpct);
 			if(!tmpctbool){
 				tmpct = tmptmpct;
@@ -2572,8 +2576,10 @@ void Bootstrapper::sflinv_full_3(Ciphertext &rtncipher, Ciphertext &cipher) {
     evaluator.rescale_to_next_inplace(tmpct);
     Ciphertext tmpct2;
     bsgs_linear_transform(tmpct2, tmpct, totlen2, basicstep2, logn, invfftcoeff2[slot_index]);
+    printf("Done with second bsgs\n");
     evaluator.rescale_to_next_inplace(tmpct2);
     bsgs_linear_transform(rtncipher, tmpct2, totlen3, basicstep3, logn, invfftcoeff3[slot_index]);
+    printf("Done with third bsgs\n");
     evaluator.rescale_to_next_inplace(rtncipher);
 }
 

@@ -24,36 +24,33 @@ void compute_inverse(Ciphertext &input,Ciphertext &output,int iters, CKKSEncoder
     vector<double> two_vec(32768,2.0);
 
     encoder.encode(one_vec,ENCODE_SCALE,plain);
+    evaluator.mod_switch_to_inplace(plain,input.parms_id());
     encryptor.encrypt(plain,output);
 
     encoder.encode(two_vec,ENCODE_SCALE,plain);
+    evaluator.mod_switch_to_inplace(plain,input.parms_id());
     encryptor.encrypt(plain,two_cipher);
+    
     
     evaluator.multiply_const(input,normalize_factor,d_cipher);
     evaluator.rescale_to_next_inplace(d_cipher);
 
     for(int i = 0 ; i<iters;i++) {
-        printf("start %d\n",i);
+        printf("start %d %zu\n",i,output.coeff_modulus_size());
         // f = 2-d
         evaluator.sub_reduced_error(two_cipher,d_cipher,f_cipher);
         printf("After sub \n");
-        decrypt_and_print_and_max_round(two_cipher,decryptor,encoder,1.0,0,5,5);
-        decrypt_and_print_and_max_round(d_cipher,decryptor,encoder,1.0,0,5,5);
-        decrypt_and_print_and_max_round(f_cipher,decryptor,encoder,1.0,0,5,5);
 
         // n = n * f
         evaluator.multiply_inplace_reduced_error(output,f_cipher,relin_keys);
         evaluator.rescale_to_next_inplace(output);
         printf("After n update: %f %f %zu %zu\n",output.scale(),f_cipher.scale(),output.coeff_modulus_size(),f_cipher.coeff_modulus_size());
-        decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0,5,5);
+        //decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0,5,5);
         
         // d = d*f
         evaluator.multiply_inplace_reduced_error(d_cipher,f_cipher,relin_keys);
         evaluator.rescale_to_next_inplace(d_cipher);
         printf("After d update \n");
-        decrypt_and_print_and_max_round(d_cipher,decryptor,encoder,1.0,0,5,5);
-        
-        decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0,5,5);
     }
     return;
 }
@@ -186,6 +183,7 @@ void compute_layernorm(Ciphertext &input,Ciphertext &output,vector<double> gamma
     vector<double>mul_factor(32768,0.0);
     vector<double>beta_factor(32768,0.0);
 
+    printf("LayerNorm: Filling masks:\n");
     for(i=0;i<16;i++){
         fill(mask.begin()+i*(rounded_row_size*2),mask.begin()+i*(rounded_row_size*2)+rounded_row_size,1.0);
         copy(gamma.begin(),gamma.end(),mul_factor.begin()+i*(rounded_row_size*2));
@@ -198,7 +196,7 @@ void compute_layernorm(Ciphertext &input,Ciphertext &output,vector<double> gamma
 
     quickSum(rolled,folded,rounded_row_size,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
 
-    printf("Layernorm Quicksum Complete !\n");
+    printf("Layernorm Quicksum Complete !: %f %zu\n",folded.scale(),folded.coeff_modulus_size());
 
     // Multiply by row size and subtract out sum
     evaluator.multiply_const(input,row_size,z);
@@ -208,7 +206,7 @@ void compute_layernorm(Ciphertext &input,Ciphertext &output,vector<double> gamma
 
     evaluator.sub_inplace_reduced_error(z,folded);
 
-    printf("Layernorm mul by row size complete !\n");
+    printf("Layernorm mul by row size complete !: %f %zu\n");
 
     // Square
     evaluator.square(z,y);
@@ -224,12 +222,10 @@ void compute_layernorm(Ciphertext &input,Ciphertext &output,vector<double> gamma
     evaluator.rescale_to_next_inplace(y);
 
 
-    evaluator.rotate_vector(y,-rounded_row_size,gal_keys,rolled);
+    evaluator.rotate_vector(y,32768-rounded_row_size,gal_keys,rolled);
     evaluator.add_inplace_reduced_error(rolled,y);
 
     quickSum(rolled,folded,rounded_row_size,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-
-    fakeBootstrap(folded,folded,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
 
     compute_inv_sqrt(folded,inv_sqrt,4,323251,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
 

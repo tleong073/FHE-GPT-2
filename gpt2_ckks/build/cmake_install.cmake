@@ -1,4 +1,4 @@
-# Install script for directory: /home/tmleong/FHE-GPT-2/gpt2_ckks
+# Install script for directory: /home/ubuntu/tmleong/FHE-GPT-2/gpt2_ckks
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,17 +44,17 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/tmleong/FHE-GPT-2/gpt2_ckks/build/common/cmake_install.cmake")
+  include("/home/ubuntu/tmleong/FHE-GPT-2/gpt2_ckks/build/common/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/tmleong/FHE-GPT-2/gpt2_ckks/build/gpt2-ckks/single-key/gpt2/cmake_install.cmake")
+  include("/home/ubuntu/tmleong/FHE-GPT-2/gpt2_ckks/build/gpt2-ckks/single-key/gpt2/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/tmleong/FHE-GPT-2/gpt2_ckks/build/gpt2-ckks/single-key/ckks_bootstrapping/cmake_install.cmake")
+  include("/home/ubuntu/tmleong/FHE-GPT-2/gpt2_ckks/build/gpt2-ckks/single-key/ckks_bootstrapping/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -65,5 +65,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/tmleong/FHE-GPT-2/gpt2_ckks/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/ubuntu/tmleong/FHE-GPT-2/gpt2_ckks/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

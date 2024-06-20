@@ -11,6 +11,7 @@ enum TestType {
     QK_MATMUL,
     SV_MATMUL,
     SOFTMAX,
+    SMAX,
     GELU,
     LAYERNORM,
     BOOTSTRAP

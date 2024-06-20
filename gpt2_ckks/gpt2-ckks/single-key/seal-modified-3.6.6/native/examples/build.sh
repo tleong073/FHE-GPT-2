@@ -1,3 +1,3 @@
-cmake -S . -B build -DSEAL_ROOT=~/mylibs
+cmake -S . -B build
 cmake --build build
 ./build/bin/sealexamples

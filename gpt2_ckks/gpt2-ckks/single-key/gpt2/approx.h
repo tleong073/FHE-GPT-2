@@ -17,13 +17,13 @@ void attn_proj_row_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &we
 	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
 
 void attn_proj_col_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
-	int A_rows, int A_cols,int W_rows,int W_cols, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
 
 void qk_matmul( vector<Ciphertext> &Q, vector<Ciphertext> &K, vector<Ciphertext> &outputs,
-	int A_rows, int A_cols,int W_rows,int W_cols, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
 
 void sv_matmul( vector<Ciphertext> &S, vector<Ciphertext> &V, vector<Ciphertext> &outputs,
-	int A_rows, int A_cols,int W_rows,int W_cols, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
 
 // Non-linear poly function evaluation
 
@@ -33,7 +33,7 @@ void compute_sign_f(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
 void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys);
 
-void sign_function(TensorCipher &inputs,TensorCipher &outputs, int df,int dg, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+void sign_function(TensorCipher &inputs,TensorCipher &outputs, int df,int dg, Bootstrapper &bootstrapper, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys);
 
 void compute_gelu_p(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
@@ -85,7 +85,7 @@ void FeedForwardLayer( vector<Ciphertext>&A,vector<Ciphertext> W1,vector<Ciphert
 	 CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
 
 void attentionLayer( vc&A,vc&qw, Ciphertext qb,vc&kw,Ciphertext kb,vc&vw,Ciphertext vb,vc&w_out,Ciphertext &b_out,Ciphertext mask,vector<vc>& kv_cache,vc &outputs, int rows, int cols, int idx,
-						CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
+						Bootstrapper &bootstrapper, KeyGenerator &keygen,CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
 
 // KV cache optimizations
 void augment_value_row(vc& A, vc& cached_val,int padded_row_size,int idx,

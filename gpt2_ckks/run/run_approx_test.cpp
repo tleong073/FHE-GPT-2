@@ -15,16 +15,16 @@ long scale_factor = 2;
 long inverse_deg = 1; 
 long logN = 16;
 long loge = 10; 
-long logn = 15;		// full slots
+long logn = logN-1;		// full slots
 long logn_1 = 14;	// sparse slots
 long logn_2 = 13;
 long logn_3 = 12;
 int logp = LOGP;
-int logq = 51;
+int logq = LOGQ;
 int log_special_prime = 60;
 int log_integer_part = logq - logp - loge + 5;
-int remaining_level = 10; // Calculation required
-int boot_level = 14; // 
+int remaining_level = 21; // Calculation required
+int boot_level = BOOT_LEVEL; // 
 int total_level = remaining_level + boot_level;
 
 
@@ -43,8 +43,12 @@ TEST_SUITE("Init") {
         TensorCipher tensor1;
         TensorCipher tensor2;
 
+        vector<double> v_mod;
+        v_mod.reserve(3);
+
         vector<double> v = {0.4,0.5};
         encoder.encode(v, scale, plain);
+        encoder.decode(plain, v_mod);
 
         encryptor.encrypt(plain,cipher1);
         encryptor.encrypt(plain,cipher2);
@@ -52,18 +56,17 @@ TEST_SUITE("Init") {
         tensor1.set_ciphertext(cipher1);
         tensor2.set_ciphertext(cipher2);
 
-        evaluator.multiply(tensor1.cipher(),tensor2.cipher(),cipher3);
-        evaluator.relinearize_inplace(cipher3, relin_keys);
-        evaluator.rescale_to_next_inplace(cipher3);
+        evaluator.multiply_inplace_reduced_error(cipher1,cipher2,relin_keys);
+        evaluator.rescale_to_next_inplace(cipher1);
 
-        vector<double> v_mod;
-        decryptor.decrypt(cipher3,plain);
+        
+        decryptor.decrypt(cipher1,plain);
         encoder.decode(plain, v_mod);
+        cout <<v_mod[0] << endl;
         
         CHECK(v[0]*v[0] == doctest::Approx(v_mod[0]));
         CHECK(v[1]*v[1] == doctest::Approx(v_mod[1]));
     }
-
 }
 
 TEST_SUITE("Pack") {
@@ -338,7 +341,7 @@ TEST_SUITE("MatrixMul") {
         Ciphertext bias;
         encoder.encode(zeros,ENCODE_SCALE,plain);
         encryptor.encrypt(plain,bias);
-        attn_proj_row_seal(A1_cipher,A2_cipher,bias,output,16,1024,1024,16,
+        attn_proj_row_seal(A1_cipher,A2_cipher,bias,output,16,1024,1024,16,keygen,
                                 encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
         printf("Done with matmul\n");
 
@@ -420,7 +423,10 @@ TEST_SUITE("PolyApprox") {
 
         TensorCipher t = TensorCipher(cipher_in);
 
-        sign_function(t,t,2,2, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
+        Bootstrapper bootstrapper(loge, logn, logN - 1, total_level, scale, boundary_K, boot_deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, evaluator, relin_keys, gal_keys);
+
+
+        sign_function(t,t,2,2,bootstrapper, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
         
         vector<double> v_expect = {-1,1,0.98683881,-0.9999994};
         vector<double> v_out;
@@ -598,7 +604,9 @@ TEST_SUITE("Fold") {
         encoder.encode(v2, scale, plain);
         encryptor.encrypt(plain,cipher2);
 
-        computeMax(cipher1,cipher2,out_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        Bootstrapper bootstrapper(loge, logn, logN - 1, total_level, scale, boundary_K, boot_deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, evaluator, relin_keys, gal_keys);
+
+        computeMax(cipher1,cipher2,out_cipher,bootstrapper,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
 
         vector<double> v_expect  = {0.3,0.5,0.1,0.4,0.0001};
         vector<double> v_res;
@@ -621,12 +629,19 @@ TEST_SUITE("Fold") {
         TensorCipher tensor2;
 
         vector<double> v = {.1,.2,.3,.4,.5,.6,.7,.8,.1,.2,.3,.4,.5,.6,.7,.8};
-        encoder.encode(v, scale, plain);
 
+        //  Starts at logp since we assuming freshly bootstrapped cipher
+        encoder.encode(v, ENCODE_SCALE, plain);
         encryptor.encrypt(plain,cipher);
 
+        Bootstrapper bootstrapper(loge, logn, logN - 1, total_level, scale, boundary_K, boot_deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, evaluator, relin_keys, gal_keys);
 
-        quickMax(cipher,out_cipher,8,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        init_bootstrap(bootstrapper,gal_steps_vector,logn);
+        while(cipher.coeff_modulus_size() > (TOTAL_LEVEL-BOOT_LEVEL)){
+            evaluator.mod_switch_to_next_inplace(cipher);
+        }
+        quickMax(cipher,out_cipher,8,bootstrapper,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
 
         vector<double> v_expect  = vector<double>(8,0.8),v_res;
         decryptor.decrypt(out_cipher,plain);
@@ -649,9 +664,12 @@ TEST_SUITE("Fold") {
         encoder.encode(v, scale, plain);
         encryptor.encrypt(plain,cipher);
 
+        Bootstrapper bootstrapper(loge, logn, logN - 1, total_level, scale, boundary_K, boot_deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, evaluator, relin_keys, gal_keys);
+
+
         compute_softmax_plain(v,out);
 
-        compute_softmax(cipher,6,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        compute_softmax(cipher,6,bootstrapper,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
 
         decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0);
 

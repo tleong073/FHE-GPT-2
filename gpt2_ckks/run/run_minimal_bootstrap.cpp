@@ -34,12 +34,12 @@ int main() {
 
 	int logp = 46;
 	int logq = 51;
-	int log_special_prime = 51;
+	int log_special_prime = 60;
 
     int log_integer_part = logq - logp - loge + 5;
 
 	// int remaining_level = 14; // Calculation required
-	int remaining_level = 21; // Calculation required
+	int remaining_level = 16; // Calculation required
 	int boot_level = 14; // greater than: subsum 1 + coefftoslot 2 + ModReduction 9 + slottocoeff 2 
 	int total_level = remaining_level + boot_level;
 
@@ -72,6 +72,12 @@ int main() {
 	
 	Bootstrapper bootstrapper(loge, logn, logN - 1, total_level, scale, boundary_K, deg, scale_factor, inverse_deg, context, keygen, encoder, encryptor, decryptor, evaluator, relin_keys, gal_keys);
 
+
+	gal_steps_vector.clear();
+	gal_steps_vector.push_back(0);
+	for (int i = 0; i < logN - 1; i++) {
+		gal_steps_vector.push_back((1 << i));
+	}
     cout << "Generating Optimal Minimax Polynomials..." << endl;
     bootstrapper.prepare_mod_polynomial();
     cout << "Adding Bootstrapping Keys..." << endl;
@@ -87,9 +93,9 @@ int main() {
 	double tot_err = 0, mean_err;
 	size_t iterations = 2;
 
-	vec input(slot_count,2.0);
-	vec before(slot_count);
-	vec after(slot_count);
+	vector<double> input(slot_count,2.0);
+	vector<double> before(slot_count);
+	vector<double> after(slot_count);
 	
 	Plaintext plain;
 	Ciphertext cipher;
@@ -102,9 +108,12 @@ int main() {
 	
 		encoder.encode(input, scale, plain);
 		encryptor.encrypt(plain, cipher);
+
+		//evaluator.rotate_vector_inplace(cipher,5,gal_keys);
 		
 		int reduce = cipher.coeff_modulus_size()-1;
 		for (int i = 0; i < reduce; i++) {
+			printf("MODSWITCHING! %f %zu\n",cipher.scale(),cipher.coeff_modulus_size());
 			evaluator.mod_switch_to_next_inplace(cipher);
 		}
 
@@ -112,10 +121,14 @@ int main() {
 
 		decryptor.decrypt(cipher, plain);
 		encoder.decode(plain, before);
+
+		for(int i;i<10;i++)
+			printf("%f ",before[i]);
+		printf("\n");
 		
         auto start = system_clock::now();
 		cout << " Old level: " << cipher.coeff_modulus_size() << endl;
-		bootstrapper.bootstrap_real_3(rtn, cipher);
+		bootstrapper.bootstrap_3(rtn, cipher);
 		cout << " New level: " << rtn.coeff_modulus_size() << endl;
 
         duration<double> sec = system_clock::now() - start;

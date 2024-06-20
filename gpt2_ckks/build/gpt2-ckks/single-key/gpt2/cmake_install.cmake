@@ -1,4 +1,4 @@
-# Install script for directory: /home/tmleong/FHE-GPT-2/gpt2_ckks/gpt2-ckks/single-key/gpt2
+# Install script for directory: /home/ubuntu/tmleong/FHE-GPT-2/gpt2_ckks/gpt2-ckks/single-key/gpt2
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

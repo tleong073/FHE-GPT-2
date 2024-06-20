@@ -5,18 +5,26 @@ cmake_minimum_required(VERSION 3.12)
 
 project(SEALExamples VERSION 3.6.6 LANGUAGES CXX)
 
+include("~/tmleong/mylibs/lib/cmake/SEAL-3.6/SEALConfig.cmake")
+include("~/tmleong/mylibs/lib/cmake/hexl-1.2.0/HEXLConfig.cmake")
+
+
 # If not called from root CMakeLists.txt
 if(NOT DEFINED SEAL_BUILD_EXAMPLES)
+    message("HERE")
     set(SEAL_BUILD_EXAMPLES ON)
 
     # Import Microsoft SEAL
-    find_package(SEAL 3.6.6 EXACT REQUIRED)
+    #find_package(SEAL 3.6.6 EXACT REQUIRED)
 
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 endif()
 
 if(SEAL_BUILD_EXAMPLES)
     add_executable(sealexamples)
+    target_link_libraries(sealexamples PRIVATE SEAL::seal)
+    #target_include_directories(sealexamples PRIVATE ~/tmleong/mylibs/include)
+    #target_link_libraries(sealexamples PRIVATE omp)
 
     target_sources(sealexamples
         PRIVATE
@@ -32,6 +40,8 @@ if(SEAL_BUILD_EXAMPLES)
 
     if(TARGET SEAL::seal)
         target_link_libraries(sealexamples PRIVATE SEAL::seal)
+        target_include_directories(sealexamples PRIVATE ~/tmleong/mylibs/include)
+        target_link_libraries(sealexamples PRIVATE omp HEXL::hexl)
     elseif(TARGET SEAL::seal_shared)
         target_link_libraries(sealexamples PRIVATE SEAL::seal_shared)
     else()

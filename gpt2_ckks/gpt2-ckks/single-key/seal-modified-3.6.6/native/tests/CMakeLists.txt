@@ -5,12 +5,15 @@ cmake_minimum_required(VERSION 3.12)
 
 project(SEALTest VERSION 3.6.6 LANGUAGES CXX C)
 
+include("~/tmleong/mylibs/lib/cmake/SEAL-3.6/SEALConfig.cmake")
+
+
 # If not called from root CMakeLists.txt
 if(NOT DEFINED SEAL_BUILD_TESTS)
     set(SEAL_BUILD_TESTS ON)
 
     # Import Microsoft SEAL
-    find_package(SEAL 3.6.6 EXACT REQUIRED)
+    #find_package(SEAL 3.6.6 EXACT REQUIRED)
 
     # Must define these variables and include macros
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})

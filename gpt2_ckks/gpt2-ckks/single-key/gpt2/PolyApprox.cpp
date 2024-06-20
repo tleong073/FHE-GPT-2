@@ -28,7 +28,7 @@ void build_cheby_basis(Ciphertext &input, vector<Ciphertext> &chebyBasis, int n,
 
 	// Encode 1's for first polynomial T0
 	vector<double> ones(slots,1.0);
-	encoder.encode(ones,init_scale,plain);
+	encoder.encode(ones,input.scale(),plain);
 	encryptor.encrypt(plain,cipher);
 	
 	chebyBasis.push_back(cipher);
@@ -309,7 +309,6 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
 void sign_function(TensorCipher &inputs,TensorCipher &outputs, int df,int dg, Bootstrapper &bootstrapper, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys)
 {
-    printf("COMPUTING G POLY\n");
     // Compute g(g(x))
     Ciphertext cipher,tmp_cipher;
     Plaintext plain;
@@ -321,11 +320,10 @@ void sign_function(TensorCipher &inputs,TensorCipher &outputs, int df,int dg, Bo
         compute_sign_g(cipher,tmp_cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
         compute_sign_g(tmp_cipher,cipher,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
     }
+    printf("After G POLY: %zu\n",cipher.coeff_modulus_size());
 
     //printf("\nDONE WITH G2\n\n\n");
-    if(cipher.coeff_modulus_size() < 8)
-        bootstrapper.bootstrap_full_real_3(cipher,cipher);
-    printf("COMPUTING F POLY");
+
     for(i=0;i<df/2;i++){
         compute_sign_f(cipher, tmp_cipher, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
         compute_sign_f(tmp_cipher, cipher, encoder, encryptor, decryptor, evaluator, gal_keys, relin_keys);
@@ -357,6 +355,7 @@ void compute_gelu_p(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     //decrypt_and_print_and_max_round(tmp_cipher,decryptor,encoder,1.0,0,5,5);
     //decrypt_and_print_and_max_round(cheby_basis[2],decryptor,encoder,1.0,0,5,5);
     evaluator.multiply_inplace_reduced_error(tmp_cipher,cheby_basis[2],relin_keys);
+    evaluator.rescale_to_next_inplace(tmp_cipher);
     //decrypt_and_print_and_max_round(tmp_cipher,decryptor,encoder,1.0,0,5,5);
 
     // Evaluate r
@@ -395,6 +394,7 @@ void compute_gelu_q(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     evaluator.rescale_to_next_inplace(tmp_cipher);
     evaluator.add_const_inplace(tmp_cipher,qq1_0);
     evaluator.multiply_inplace_reduced_error(tmp_cipher,cheby_basis[2],relin_keys);
+    evaluator.rescale_to_next_inplace(tmp_cipher);
     
 
     evaluator.multiply_const(input,qr1_1,output);
@@ -442,7 +442,7 @@ def exp(x,r):
 void compute_exp(Ciphertext &input,Ciphertext &output,int r, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys)
 {
-    printf(" START COMPUTING EXP\n");
+    printf(" START COMPUTING EXP: %zu\n",input.coeff_modulus_size());
     double power = pow(2,r);
 
     // Compute term to exponentiate
@@ -482,15 +482,13 @@ void compute_softmax(Ciphertext &input,int r,Bootstrapper &bootstrapper, CKKSEnc
     printf("About to prepare for max computation\n");
 
     // Prepare cipher for folding
-    evaluator.rotate_vector(input,-128,gal_keys,rolled);
+    evaluator.rotate_vector(input,32640,gal_keys,rolled);
     evaluator.add_inplace_reduced_error(input,rolled);
 
     quickMax(input,maxes,128,bootstrapper,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-    printf("MAX RESULT: \n");
+    printf("MAX RESULT: %zu\n",maxes.coeff_modulus_size());
 
-    decrypt_and_print_and_max_round(maxes,decryptor,encoder,1.0,0);
-
-    Ciphertext bluh = input;
+    // decrypt_and_print_and_max_round(maxes,decryptor,encoder,1.0,0);
 
     evaluator.sub_inplace_reduced_error(input,maxes);
 
@@ -499,14 +497,13 @@ void compute_softmax(Ciphertext &input,int r,Bootstrapper &bootstrapper, CKKSEnc
 
     printf("After Exp\n");
     //encoder.encode(ones_mask,exps.scale(),plain_ones);
-    encoder.encode(zeros_mask,exps.scale(),plain_zeros);
-    evaluator.mod_switch_to_inplace(plain_zeros,exps.parms_id());
-    evaluator.multiply_plain_inplace(exps,plain_zeros);
+    evaluator.multiply_vector_inplace_reduced_error(exps,zeros_mask);
+    evaluator.rescale_to_next_inplace(exps);
     //evaluator.sub_plain_inplace(exps,plain_ones);
 
     // fakeBootstrap(exps,exps,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-     
-    bootstrapper.bootstrap_full_real_3(rolled,exps);
+
+    bootstrap(exps,rolled,bootstrapper,evaluator);
     
     // Compute sum
     evaluator.rotate_vector_inplace(rolled,-128,gal_keys);
@@ -550,8 +547,8 @@ void compute_smax(Ciphertext &input,int r, int gamma, CKKSEncoder &encoder, Encr
 
     encoder.encode(gamma_mask,input.scale(),plain_gamma);
     evaluator.mod_switch_to_inplace(plain_gamma,input.parms_id());
-    printf("About to prepare for max computation\n");
 
+    // Instead of max, we simply subtract out a gamma
     evaluator.add_plain_inplace(input,plain_gamma);
 
     // Compute exp and subtract out ones
@@ -559,18 +556,17 @@ void compute_smax(Ciphertext &input,int r, int gamma, CKKSEncoder &encoder, Encr
 
     printf("After Exp\n");
     //encoder.encode(ones_mask,exps.scale(),plain_ones);
-    encoder.encode(zeros_mask,exps.scale(),plain_zeros);
-    evaluator.mod_switch_to_inplace(plain_zeros,exps.parms_id());
-    evaluator.multiply_plain_inplace(exps,plain_zeros);
+    evaluator.multiply_vector_inplace_reduced_error(exps,zeros_mask);
+    evaluator.rescale_to_next_inplace(exps);
     //evaluator.sub_plain_inplace(exps,plain_ones);
 
     // fakeBootstrap(exps,exps,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
     
     // Compute sum
-    evaluator.rotate_vector(exps,-128,gal_keys,rolled);
+    evaluator.rotate_vector(exps,32768-128,gal_keys,rolled);
     evaluator.add_inplace_reduced_error(rolled,exps);
     quickSum(rolled,summed,128,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-    printf("After QuickSum\n");
+    printf("After QuickSum: %f %zu\n",summed.scale(),summed.coeff_modulus_size());
     decrypt_and_print_and_max_round(summed,decryptor,encoder,1.0,0);
 
 

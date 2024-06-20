@@ -1,3 +1,3 @@
 #!/bin/bash
 
-make && ./$1_test --test-case=$2
+cmake --build build && ./build/$1 --test-case=$2

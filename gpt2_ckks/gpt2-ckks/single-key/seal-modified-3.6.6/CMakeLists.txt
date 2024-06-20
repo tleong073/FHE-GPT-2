@@ -42,6 +42,8 @@ include(CheckSymbolExists)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(SEALMacros)
 
+include("~/tmleong/mylibs/lib/cmake/hexl-1.2.0/HEXLConfig.cmake")
+
 # Always build position-independent-code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -215,14 +217,9 @@ option(SEAL_USE_INTEL_HEXL ${SEAL_USE_INTEL_HEXL_OPTION_STR} OFF)
 message(STATUS "SEAL_USE_INTEL_HEXL: ${SEAL_USE_INTEL_HEXL}")
 
 if(SEAL_USE_INTEL_HEXL)
-    if(SEAL_BUILD_DEPS)
-        message(STATUS "Intel HEXL: download ...")
-        seal_fetch_thirdparty_content(ExternalIntelHEXL)
-    else()
-        find_package(HEXL 1.1.0)
-        if (NOT TARGET HEXL::hexl)
-            FATAL_ERROR("Intel HEXL: not found")
-        endif()
+    find_package(HEXL 1.2.0)
+    if (NOT TARGET HEXL::hexl)
+        FATAL_ERROR("Intel HEXL: not found")
     endif()
 endif()
 
@@ -371,6 +368,7 @@ install(
 
 # Build only a static library
 if(NOT BUILD_SHARED_LIBS)
+    message(STATUS "INSIDE NOT BUILD SHARES LIBS")
     add_library(seal STATIC ${SEAL_SOURCE_FILES})
     seal_set_version_filename(seal)
     seal_set_language(seal)
@@ -381,8 +379,8 @@ if(NOT BUILD_SHARED_LIBS)
 
 	# this is added by E.-S.Lee to use OpenMP
 	target_compile_options(seal PRIVATE -fopenmp)
-	target_include_directories(seal PUBLIC /usr/include /usr/local/include)
-	target_link_libraries(seal PUBLIC gomp)
+	target_include_directories(seal PUBLIC /usr/include /usr/local/include /home/ubuntu/tmleong/mylibs/include)
+    target_link_libraries(seal PUBLIC gomp)
 
     if(SEAL_USE_MSGSL)
         if(SEAL_BUILD_DEPS)
@@ -415,18 +413,13 @@ if(NOT BUILD_SHARED_LIBS)
     endif()
 
     if(SEAL_USE_INTEL_HEXL)
-        if(SEAL_BUILD_DEPS)
-            add_dependencies(seal HEXL::hexl)
-            target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${hexl_SOURCE_DIR}/hexl/include>)
-            seal_combine_archives(seal HEXL::hexl)
-        else()
+            message("HELLO2")
             target_link_libraries(seal PRIVATE HEXL::hexl)
             get_target_property(
                 HEXL_INCLUDE_DIR
                 HEXL::hexl
                 INTERFACE_INCLUDE_DIRECTORIES)
             target_include_directories(seal PUBLIC ${HEXL_INCLUDE_DIR})
-        endif()
     endif()
 
     # Set secure compile options if SEAL_SECURE_COMPILE_OPTIONS is ON; only supported on MSVC
@@ -590,12 +583,6 @@ if(SEAL_BUILD_DEPS)
     if(SEAL_USE_MSGSL)
         install(
             DIRECTORY ${msgsl_SOURCE_DIR}/include/gsl
-            DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
-    endif()
-    # Intel HEXL
-    if(SEAL_USE_INTEL_HEXL)
-        install(
-            DIRECTORY ${hexl_SOURCE_DIR}/hexl/include/hexl
             DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
     endif()
 endif()

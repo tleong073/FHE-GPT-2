@@ -312,6 +312,37 @@ void pack_plain_row(vector<vector<double>>& v,int rows,int row_size,vector<vecto
 	return;
 }
 
+// Wrapper for bootstrapping
+void bootstrap(Ciphertext &ctxt, Ciphertext &rtn, Bootstrapper &bootstrapper, Evaluator &evaluator) {
+
+	while(ctxt.coeff_modulus_size() > 1){
+		printf("MODSWITCHING! %f %zu\n",ctxt.scale(),ctxt.coeff_modulus_size());
+		evaluator.mod_switch_to_next_inplace(ctxt);
+	}
+	printf("FINAL: %f %zu %zu\n",ctxt.scale(),ctxt.coeff_modulus_size(),ctxt.size());
+	bootstrapper.bootstrap_3(rtn,ctxt);
+}
+
+void init_bootstrap(Bootstrapper &bootstrapper,vector<int> &gal_steps_vector,int logn) {
+
+    cout << "Generating Optimal Minimax Polynomials..." << endl;
+    bootstrapper.prepare_mod_polynomial();
+    cout << "Adding Bootstrapping Keys..." << endl;
+
+	bootstrapper.addLeftRotKeys_Linear_to_vector_3(gal_steps_vector);
+    bootstrapper.slot_vec.push_back(logn);
+
+	cout << "Generating Linear Transformation Coefficients..." << endl;
+	bootstrapper.generate_LT_coefficient_3();
+}
+
 void add_galois_keys(vector<double>&gal_steps_vector) {
 	return;
+}
+void surefire_rotate(Ciphertext &cipher,int shift_amt, KeyGenerator &keygen,Evaluator &evaluator) {
+	vector<int> steps;
+	steps.push_back(-shift_amt);
+	GaloisKeys tmp_keys;
+	keygen.create_galois_keys(steps,tmp_keys);
+	evaluator.rotate_vector_inplace(cipher,-shift_amt,tmp_keys);
 }

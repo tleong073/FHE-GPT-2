@@ -291,12 +291,18 @@ void attn_proj_row_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &we
 						shift_amt = desired_location - pos*2048;
 						printf("Shift amt: %d\n",shift_amt);
 
+						/*
 						vector<int> steps;
 						steps.push_back(-shift_amt);
 						GaloisKeys tmp_keys;
 						keygen.create_galois_keys(steps,tmp_keys);
-
 						evaluator.rotate_vector_inplace(masked_out,-shift_amt,tmp_keys);
+						*/
+						
+
+						// A bit jank, but we with our limited memory, we cant store all the Galois Keys for now.
+						surefire_rotate(masked_out,shift_amt, keygen, evaluator);
+
 						printf("desired_location: %d %d %d %d\n",desired_location,shift_amt,pos,outputs[head].is_transparent());
 						evaluator.add_inplace_reduced_error(outputs[head],masked_out);
 						
@@ -322,7 +328,7 @@ void attn_proj_row_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &we
  * @param argMap current procedure's arguments
  */
 void attn_proj_col_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
-	int A_rows, int A_cols,int W_rows,int W_cols, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
 
 		// Row and column dimension computations
 
@@ -362,7 +368,8 @@ void attn_proj_col_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &we
 						desired_location = head_col*256+row;
 
 						shift_amt = desired_location - pos*2048;
-						rotate_inplace(masked_out,-shift_amt,evaluator,gal_keys);
+						// A bit jank, but we with our limited memory, we cant store all the Galois Keys for now.
+						surefire_rotate(masked_out,shift_amt, keygen, evaluator);
 
 						evaluator.add_inplace_reduced_error(outputs[head],masked_out);
 					}
@@ -386,7 +393,7 @@ void attn_proj_col_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &we
  * @param argMap current procedure's arguments
  */
 void qk_matmul( vector<Ciphertext> &Q, vector<Ciphertext> &K, vector<Ciphertext> &outputs,
-	int A_rows, int A_cols,int W_rows,int W_cols, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
 
 		// Row and column dimension computations
 
@@ -417,8 +424,8 @@ void qk_matmul( vector<Ciphertext> &Q, vector<Ciphertext> &K, vector<Ciphertext>
                 
 					shift_amt = desired_location - pos*128;
 
-					//rolled = np.roll(masked_out, shift_amt);
-					evaluator.rotate_vector_inplace(masked_out,-shift_amt,gal_keys);
+					// A bit jank, but we with our limited memory, we cant store all the Galois Keys for now.
+					surefire_rotate(masked_out,shift_amt, keygen, evaluator);
 
 					evaluator.add_inplace_reduced_error(outputs[i],masked_out);
 				}
@@ -439,7 +446,7 @@ void qk_matmul( vector<Ciphertext> &Q, vector<Ciphertext> &K, vector<Ciphertext>
  * @param argMap current procedure's arguments
  */
 void sv_matmul( vector<Ciphertext> &S, vector<Ciphertext> &V, vector<Ciphertext> &outputs,
-	int A_rows, int A_cols,int W_rows,int W_cols, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
 
 		// Row and column dimension computations
 
@@ -477,8 +484,8 @@ void sv_matmul( vector<Ciphertext> &S, vector<Ciphertext> &V, vector<Ciphertext>
                 
 					shift_amt = desired_location - pos*256;
 
-					//rolled = np.roll(masked_out, shift_amt);
-					evaluator.rotate_vector_inplace(masked_out,-shift_amt,gal_keys);
+					// A bit jank, but we with our limited memory, we cant store all the Galois Keys for now.
+					surefire_rotate(masked_out,shift_amt, keygen, evaluator);
 
 					evaluator.add_inplace_reduced_error(outputs[cipher_idx],masked_out);
 				}

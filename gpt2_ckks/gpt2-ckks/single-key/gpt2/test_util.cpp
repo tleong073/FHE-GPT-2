@@ -80,7 +80,13 @@ void populate_tests(map<int,test_entry_t> &tests) {
 
         tests[SOFTMAX] = {
             "Softmax",
-            "Performs softmax opperation",
+            "Performs softmax opperation on a single ciphertext",
+            SOFTMAX
+        };
+
+        tests[SMAX] = {
+            "Smax",
+            "Performs optimized softmax on a single ciphertext",
             SOFTMAX
         };
 

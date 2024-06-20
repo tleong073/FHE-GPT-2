@@ -44,7 +44,7 @@ void quickSum(Ciphertext &input,Ciphertext &output,int n, CKKSEncoder &encoder, 
 }
 
 // Computes max = 0.5*((a+b)*((a-b)*sign(a-b)))
-void computeMax(Ciphertext &input1,Ciphertext &input2,Ciphertext &output, Bootstrapper &bootstraper, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+void computeMax(Ciphertext &input1,Ciphertext &input2,Ciphertext &output, Bootstrapper &bootstrapper, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) {
     
     printf("COMPUTING MAX\n");
@@ -57,9 +57,9 @@ void computeMax(Ciphertext &input1,Ciphertext &input2,Ciphertext &output, Bootst
     TensorCipher t = TensorCipher(normalized_diff);
     TensorCipher out;
     printf("COMPUTING SIGN: %zu\n",normalized_diff.coeff_modulus_size());
-    sign_function(t,out,2,2,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    sign_function(t,out,2,2,bootstrapper,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
     sign_cipher = out.cipher();
-    printf("DONE COMPUTING SIGN: %f\n",sign_cipher.scale());
+    printf("Sign Cipher: %f %zu \n",sign_cipher.scale(),sign_cipher.coeff_modulus_size());
     //decrypt_and_print_and_max_round(sign_cipher,decryptor,encoder,1.0,0);
     //decrypt_and_print_and_max_round(diff_cipher,decryptor,encoder,1.0,0);
 
@@ -76,26 +76,25 @@ void computeMax(Ciphertext &input1,Ciphertext &input2,Ciphertext &output, Bootst
     evaluator.rescale_to_next_inplace(output);
     //decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0);
 
+    printf("Sign ouput parameter levels: %f %zu\n",output.scale(),output.coeff_modulus_size());
+
     return;
 }
 
 // Assume input is formatted for fold
 void quickMax(Ciphertext &input,Ciphertext &output,int n, Bootstrapper &bootstrapper,CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) {
-    Ciphertext cipher = input,rot_cipher,tmp_cipher;
+    Ciphertext cipher = input,rot_cipher,tmp_cipher,res_cipher;
 
     int acc = 1;
     for(int i = 0; i<log2(n);i++) {
-        tmp_cipher=cipher;
-        if(tmp_cipher.coeff_modulus_size() <= 13){
-            while(cipher.coeff_modulus_size() > 1){
-			    evaluator.mod_switch_to_next_inplace(cipher);
-            }
-            bootstrapper.bootstrap_full_real_3(cipher,tmp_cipher);
-        }
-            
+        tmp_cipher=cipher;    
         evaluator.rotate_vector(tmp_cipher,acc,gal_keys,rot_cipher);
+        printf("QuickMax iteration: %d\n",i);
         computeMax(tmp_cipher,rot_cipher,cipher,bootstrapper,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+        if(cipher.coeff_modulus_size() < 18)
+            bootstrap(cipher,cipher,bootstrapper,evaluator);
+        printf("DONE WITH MAX!\n");
         acc *= 2;
     }
     output = cipher;
