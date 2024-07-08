@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package secureinference;
+
+// Interface exported by the server.
+service SecureInference {
+  // Sends over SEAL params.
+  //
+  // Obtains the feature at a given position.
+  //
+  rpc InitServer(Params) returns (InitResponse) {}
+
+  // Sends over PIR queries for embeddings
+  rpc TestEval(Query) returns (Response) {}
+
+  // Sends over PIR queries for embeddings
+  rpc EmbedQuery(Query) returns (Response) {}
+}
+
+message InitResponse {
+  string status = 1;
+}
+
+// SEAL params
+message Params {
+  bytes parms = 1;
+  uint32 parms_size = 2;
+  bytes relin_keys = 3;
+  uint32 relin_key_size = 4;
+  bytes gal_keys = 5;
+  uint32 gal_key_size = 6;
+}
+
+// Queries
+message Query {
+  repeated Ciphertext ciphers = 1;
+}
+
+// Responses
+message Response {
+  repeated Ciphertext ciphers = 1;
+}
+
+// Ciphers
+message Ciphertext {
+  bytes value = 1;
+  uint32 size = 2;
+}
+
