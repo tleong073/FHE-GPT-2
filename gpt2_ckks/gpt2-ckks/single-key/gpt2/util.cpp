@@ -1,8 +1,13 @@
 #include "util.h"
 #include <math.h>
 
+#include <chrono>
+
 using namespace std;
 using namespace seal;
+using namespace chrono;
+
+
 
 TensorCipher::TensorCipher()
 {
@@ -286,14 +291,11 @@ void init_output(int num_ciphers,vector<Ciphertext> &output, CKKSEncoder &encode
 // Masks out length elements starting from start
 void mask_out(Ciphertext &cipher,Ciphertext &out, int start,int length,CKKSEncoder &encoder,Evaluator &evaluator,RelinKeys &relin_keys) {
     vector<double> x(32768,0.0);
-    Plaintext plain;
 
     fill(x.begin()+start,x.begin()+start+length,1.0);
-	printf("mask_out start: %d length: %d \n",start,length);
 
 	
     evaluator.multiply_vector_reduced_error(cipher,x,out);
-	printf("mask_out mul done : %d\n",out.is_transparent());
     evaluator.rescale_to_next_inplace(out);
 }
 
@@ -340,9 +342,15 @@ void add_galois_keys(vector<double>&gal_steps_vector) {
 	return;
 }
 void surefire_rotate(Ciphertext &cipher,int shift_amt, KeyGenerator &keygen,Evaluator &evaluator) {
+	
+	auto start = system_clock::now();
+
 	vector<int> steps;
 	steps.push_back(-shift_amt);
 	GaloisKeys tmp_keys;
 	keygen.create_galois_keys(steps,tmp_keys);
+	duration<double> sec = system_clock::now() - start;
+    cout << "Keygen time : " << sec.count() << "s" << endl;
+
 	evaluator.rotate_vector_inplace(cipher,-shift_amt,tmp_keys);
 }

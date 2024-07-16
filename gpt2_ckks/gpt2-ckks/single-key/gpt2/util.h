@@ -20,16 +20,17 @@ using namespace minicomp;
 
 // Other useful defines
 #define LOGP 46
-#define LOGQ 51
+#define LOGQ 49
 #define ENCODE_SCALE pow(2,LOGP)
 #define BOOT_LEVEL 14 
 #define TOTAL_LEVEL 35
+#define THREAD_NUM 32
 
 #define vec vector<double>
 #define vvec vector<vector<double>>
 #define vc vector<Ciphertext>
 
-#define PRINT_CIPHER(X) printf("",X.scale(),X.coeff_modulus_size());
+#define PRINT_CIPHER(X,str) printf(str,X.scale(),X.coeff_modulus_size())
 
 // Macro used for test setup
 #define INIT(X) EncryptionParameters params;\
@@ -53,6 +54,7 @@ double scale = pow(2.0, logp);\
 SEALContext context(params);\
 KeyGenerator keygen(context);\
 keygen.create_public_key(public_key);\
+cout << "Setting Parameters2" <<endl;\
 secret_key = keygen.secret_key();\
 keygen.create_relin_keys(relin_keys);\
 vector<int> gal_steps_vector;\
@@ -60,6 +62,7 @@ for(int i=0; i<logN-1; i++) gal_steps_vector.push_back((1 << i));\
 vector<int> rotation_kinds = {0,1,2,3,4,5,6,7,8,9,10,32640,31744\
 ,12288,16384,20480,24576,28672,32672,32704,32736,32,64,96,31872,32096,32320,32544,224\
 ,448,672,896,32765,32766,32767,32740,32747,32754,32761,14,21,28};\
+for(int i=0; i<32768; i+=2048) rotation_kinds.push_back(i);\
 for(auto rot: rotation_kinds)\
 {\
 	if(find(gal_steps_vector.begin(), gal_steps_vector.end(), rot) == gal_steps_vector.end()) gal_steps_vector.push_back(rot);\

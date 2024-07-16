@@ -4,9 +4,17 @@
 
 // Matrix related functions
 
+void cipher_plain_128_128( Ciphertext &left_input, unordered_map<string,vector<double>> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
+
+void batch_matmul( vector<Ciphertext> &left_input, unordered_map<string,vector<double>> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
+
+void qk_matmul_col( vector<Ciphertext> &left_input,vector<Ciphertext> &right_input, unordered_map<string,vector<double>> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
+
 void col_matrix_multiplication_seal( vector<TensorCipher> &left_inputs, vector<TensorCipher> &right_inputs, vector<TensorCipher> &outputs, vector<double> bias,
 	int rows, int cols, Config &config, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys);
-
 
 void decrypt_and_print(const Ciphertext &cipher, Decryptor &decryptor, CKKSEncoder &encoder,int n);
 
@@ -42,7 +50,7 @@ void compute_gelu_p(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
 void compute_gelu_q(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys);
 
-void gelu(Ciphertext &inputs,Ciphertext &outputs, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+void compute_gelu(Ciphertext &inputs,Ciphertext &outputs,Bootstrapper &bootstrapper, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys);
 
 void compute_exp(Ciphertext &input,Ciphertext &output,int r, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,

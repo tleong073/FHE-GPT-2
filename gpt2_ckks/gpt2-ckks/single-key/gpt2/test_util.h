@@ -7,6 +7,7 @@
 using namespace std;
 
 enum TestType {
+    CIPHER_PLAIN_128,
     ATTN_PROJ_ROW,
     QK_MATMUL,
     SV_MATMUL,

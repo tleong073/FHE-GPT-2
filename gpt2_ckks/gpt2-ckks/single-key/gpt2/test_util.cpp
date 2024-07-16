@@ -60,6 +60,12 @@ ATTN_PROJ_ROW,
     BOOTSTRAP
 */
 void populate_tests(map<int,test_entry_t> &tests) {
+        tests[CIPHER_PLAIN_128] = {
+            "Performs ciphertext/plaintext multiplication",
+            "Performs projection onto Q,K,V matrices",
+            CIPHER_PLAIN_128
+        };
+
         tests[ATTN_PROJ_ROW] = {
             "Attention layer projection",
             "Performs projection onto Q,K,V matrices",

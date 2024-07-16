@@ -18,28 +18,28 @@ def quickSum(vec,n):
 */
 
 void quickSum(Ciphertext &input,Ciphertext &output,int n, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
-						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) {
+						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys) 
+{
     
     Ciphertext cipher;
     cipher.reserve(16);
-    output.reserve(16);
     int acc = 1;
-    evaluator.rotate_vector(input,acc,gal_keys,output);
+    evaluator.rotate_vector(input,acc,gal_keys,cipher);
+    evaluator.add(input,cipher,output);
     acc *= 2;
 
-
-    printf("Output \n");
-    decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0);
-    printf("-----GAP-----\n");
-    for(int i = 0; i<log2(n);i++) {
-        printf("Folding2: %d %d %d\n",i,(int)(floor(log2(n))),acc);
+    //printf("Output \n");
+    //decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0);
+    //printf("-----GAP-----\n");
+    for(int i = 0; i<log2(n)-1;i++) {
         evaluator.rotate_vector(output,acc,gal_keys,cipher);
-        printf("Cipher \n");
-        decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0);
+        //printf("Cipher \n");
+        //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0);
         evaluator.add_inplace_reduced_error(output,cipher);
-        decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0);
+        //decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0);
         acc *= 2;
     }
+    //printf("Done with quick sum\n");
     return;
 }
 

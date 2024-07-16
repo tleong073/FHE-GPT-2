@@ -34,14 +34,14 @@ void build_cheby_basis(Ciphertext &input, vector<Ciphertext> &chebyBasis, int n,
 	chebyBasis.push_back(cipher);
     chebyBasis.push_back(input);
     cipher = input;
-    printf("input scale+level: %f %zu\n",input.scale(),input.coeff_modulus_size());
+    //printf("input scale+level: %f %zu\n",input.scale(),input.coeff_modulus_size());
 
     // 1 less depth used for t2 calculation
     evaluator.square_inplace(cipher);
     evaluator.relinearize_inplace(cipher,relin_keys);
     evaluator.rescale_to_next_inplace(cipher);
 
-    printf("line42 T2 scale+level: %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),input.scale(),input.coeff_modulus_size());
+    //printf("line42 T2 scale+level: %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),input.scale(),input.coeff_modulus_size());
     /*
     evaluator.multiply_const_inplace(cipher,2.0);
     evaluator.rescale_to_next_inplace(cipher);
@@ -50,8 +50,8 @@ void build_cheby_basis(Ciphertext &input, vector<Ciphertext> &chebyBasis, int n,
 
     evaluator.add_const_inplace(cipher,-1.0);
     chebyBasis.push_back(cipher); // L-2
-    printf("ChebyBasis T2 done\n");
-    printf("line52 T2 scale+level: %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),input.scale(),input.coeff_modulus_size());
+    //printf("ChebyBasis T2 done\n");
+    //printf("line52 T2 scale+level: %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),input.scale(),input.coeff_modulus_size());
 
    // printf("line 60 T2 scale+level: %f %zu %f %zu\n",tmp_cipher.scale(),tmp_cipher.coeff_modulus_size(),cipher.scale(),cipher.coeff_modulus_size());
     Ciphertext tmp2;
@@ -69,7 +69,7 @@ void build_cheby_basis(Ciphertext &input, vector<Ciphertext> &chebyBasis, int n,
     evaluator.multiply_const(input,-1.0,tmp2);
     evaluator.rescale_to_next_inplace(tmp2);
 
-    printf("T2 scale+level: %f %zu %f %zu\n",tmp_cipher.scale(),tmp_cipher.coeff_modulus_size(),tmp2.scale(),tmp2.coeff_modulus_size());
+    //printf("T2 scale+level: %f %zu %f %zu\n",tmp_cipher.scale(),tmp_cipher.coeff_modulus_size(),tmp2.scale(),tmp2.coeff_modulus_size());
     //decrypt_and_print_and_max_round(tmp2,decryptor,encoder,1.0,0,5,5);
     evaluator.add_inplace_reduced_error(tmp_cipher,tmp2);
     chebyBasis.push_back(tmp_cipher); // L-4
@@ -79,11 +79,11 @@ void build_cheby_basis(Ciphertext &input, vector<Ciphertext> &chebyBasis, int n,
 	// Push back T1-Tn
 	for(int i = 0; i<n-2;i++) {
 		// 2T_{n}^2 - 1
-        printf("Pre square %f %zu\n",cipher.scale(),cipher.coeff_modulus_size());
+        //printf("Pre square %f %zu\n",cipher.scale(),cipher.coeff_modulus_size());
 		evaluator.square_inplace(cipher);
 		evaluator.relinearize_inplace(cipher,relin_keys);
 		evaluator.rescale_to_next_inplace(cipher);
-        printf("Post square %f %zu\n",cipher.scale(),cipher.coeff_modulus_size());
+        //printf("Post square %f %zu\n",cipher.scale(),cipher.coeff_modulus_size());
         //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0,5,5);
         /*
 		evaluator.multiply_const_inplace(cipher,2.0);
@@ -97,7 +97,7 @@ void build_cheby_basis(Ciphertext &input, vector<Ciphertext> &chebyBasis, int n,
         //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0,5,5);
         chebyBasis.push_back(cipher);
 	}
-    //printf("ChebyBasis complete\n");
+    printf("ChebyBasis complete\n");
 }
 
 void compute_sign_f(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
@@ -152,8 +152,8 @@ void compute_sign_f(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     //printf("frq2 done!\n");
 
     evaluator.multiply_const(input,coeff_frq2_r,tmp_cipher);//L+1
-    //printf("fq2_q_0 done! %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),tmp_cipher.scale(),tmp_cipher.coeff_modulus_size());
     evaluator.rescale_to_next_inplace(tmp_cipher);
+    //printf("fq2_q_0 done! %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),tmp_cipher.scale(),tmp_cipher.coeff_modulus_size());
 
     //printf("fq2_q_0 done! %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),tmp_cipher.scale(),tmp_cipher.coeff_modulus_size());
     evaluator.add_inplace_reduced_error(cipher,tmp_cipher); // L+2
@@ -162,9 +162,8 @@ void compute_sign_f(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     //printf("modulus check 3 %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),cheby_basis[4].scale(),cheby_basis[4].coeff_modulus_size());
     //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0,5,5);
 
-    //printf("modulus check %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),tmp_cipher.scale(),tmp_cipher.coeff_modulus_size());
+    //printf("modulus check %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),cheby_basis[4].scale(),cheby_basis[4].coeff_modulus_size());
     evaluator.multiply_inplace_reduced_error(cipher,cheby_basis[4],relin_keys); // L+3
-    //evaluator.relinearize_inplace(cipher,relin_keys);
     evaluator.rescale_to_next_inplace(cipher); // L+4
     //printf("fq2_q done! %f %zu\n",cipher.scale(),cipher.coeff_modulus_size());
     //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0,5,5);
@@ -214,7 +213,7 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     // Compute Cheby basis
     vector<Ciphertext> cheby_basis;
     build_cheby_basis(input,cheby_basis,4,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-    printf("BUILT CHEBY BASIS\n");
+    //printf("BUILT CHEBY BASIS\n");
     // Compute first level.
     double coeff_fq1 = -1.121704102;
     double coeff_fr1 =  1.978370667;
@@ -241,7 +240,7 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     //decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0,5,5);
     //printf("First level complete: %f %zu\n",output.scale(),output.coeff_modulus_size());
 
-    printf("FIRST LEVEL COMPLETE!\n");
+    //printf("FIRST LEVEL COMPLETE!\n");
     // Compute second level.
 
     double coeff_frq2_q = -0.6178588867;
@@ -251,7 +250,7 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     //decrypt_and_print_and_max_round(cheby_basis[3],decryptor,encoder,1.0,0,5,5);
     evaluator.multiply_const(cheby_basis[3],coeff_frq2_q,cipher);
     evaluator.rescale_to_next_inplace(cipher); // L+2
-    printf("frq2 done!\n");
+    //printf("frq2 done!\n");
 
     evaluator.multiply_const(input,coeff_frq2_r,tmp_cipher);//L+1
     //printf("fq2_q_0 done! %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),tmp_cipher.scale(),tmp_cipher.coeff_modulus_size());
@@ -260,7 +259,7 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
 
     //decrypt_and_print_and_max_round(tmp_cipher,decryptor,encoder,1.0,0,5,5);
     //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0,5,5);
-    printf("fq2_q_0 done! %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),tmp_cipher.scale(),tmp_cipher.coeff_modulus_size());
+    //printf("fq2_q_0 done! %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),tmp_cipher.scale(),tmp_cipher.coeff_modulus_size());
     evaluator.add_inplace_reduced_error(cipher,tmp_cipher); // L+2
     //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0,5,5);
     //printf("f2q done! %f %zu %f %zu\n",cipher.scale(),cipher.coeff_modulus_size(),cheby_basis[3].scale(),cheby_basis[3].coeff_modulus_size());
@@ -275,7 +274,7 @@ void compute_sign_g(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     //decrypt_and_print_and_max_round(cipher,decryptor,encoder,1.0,0,5,5);
     
     //evaluator.mod_switch_to_inplace(output,cipher.parms_id());
-    printf("fq3_q done! %f %zu %f %zu\n",output.scale(),output.coeff_modulus_size(),cipher.scale(),cipher.coeff_modulus_size());
+    //printf("fq3_q done! %f %zu %f %zu\n",output.scale(),output.coeff_modulus_size(),cipher.scale(),cipher.coeff_modulus_size());
     // Compute fr3 = frq2*cheby[3] + fr2
     //decrypt_and_print_and_max_round(output,decryptor,encoder,1.0,0,5,5);
     evaluator.add_inplace_reduced_error(output,cipher); // L+4
@@ -337,6 +336,7 @@ void sign_function(TensorCipher &inputs,TensorCipher &outputs, int df,int dg, Bo
 void compute_gelu_p(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
 						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys)
 {
+    printf("COMPUTING GELU P\n");
     // Initial level: L
     Plaintext plain;
     Ciphertext cipher,tmp_cipher;
@@ -379,6 +379,9 @@ void compute_gelu_q(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
      // T3: L-4
      // T4: L-4
      // T5: L-6
+
+    printf("COMPUTING GELU Q\n");
+
 
     Plaintext plain;
     Ciphertext cipher,tmp_cipher;
@@ -428,10 +431,76 @@ void compute_gelu_q(Ciphertext &input,Ciphertext &output, CKKSEncoder &encoder, 
     evaluator.add_inplace_reduced_error(output,cipher);
     return;
 }
+/*
+def gelu(x):
+    s2,s1,s0 = 0.5*np.sign(x-3),0.5*np.sign(x+1.95),0.5*np.sign(x+4)
 
-void gelu(Ciphertext &inputs,Ciphertext &outputs, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
-						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys){
-                            return;
+    b0,b1,b2,b3 = 0.5*s0,s0-s1,s1-s2,0.5*s2
+
+    return (b0*0) + (b1*gelu_p(x)) + (b2*gelu_q(x)) + (b3*x)
+*/
+
+void compute_gelu(Ciphertext &inputs,Ciphertext &outputs,Bootstrapper &bootstrapper, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor,
+						Evaluator &evaluator, GaloisKeys& gal_keys, RelinKeys &relin_keys)
+{
+    Ciphertext s0,s1,s2,b0,b1,b2,b3,p,q,sign_cipher;
+
+    TensorCipher tc;
+
+    // Compute s2
+    evaluator.add_const(inputs,-3.0,s2);
+    tc = TensorCipher(s2);
+    sign_function(tc,tc,2,2,bootstrapper,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    evaluator.multiply_const(tc.cipher(),0.5,s2);
+    evaluator.rescale_to_next_inplace(s2);
+
+    // Compute s1
+    evaluator.add_const(inputs,1.95,s1);
+    tc = TensorCipher(s1);
+    sign_function(tc,tc,2,2,bootstrapper,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    evaluator.multiply_const(tc.cipher(),0.5,s1);
+    evaluator.rescale_to_next_inplace(s1);
+
+    // Compute s0
+    evaluator.add_const(inputs,4.0,s0);
+    tc = TensorCipher(s0);
+    sign_function(tc,tc,2,2,bootstrapper,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+    evaluator.multiply_const(tc.cipher(),0.5,s0);
+    evaluator.rescale_to_next_inplace(s0);
+
+    printf("Done with sign function\n");
+    PRINT_CIPHER(s0,"s0: %f %zu\n");
+    // Compute b1,b2,b3
+    evaluator.sub_reduced_error(s0,s1,b1);
+
+    evaluator.sub_reduced_error(s1,s2,b2);
+
+    evaluator.multiply_const(s2,0.5,b3);
+    evaluator.rescale_to_next_inplace(b3);
+
+    // Output computations
+    compute_gelu_p(inputs,p,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+    compute_gelu_q(inputs,q,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+    printf("Done with GELU POLYs:\n");
+    PRINT_CIPHER(p,"P: %f %zu\n");
+    PRINT_CIPHER(b1,"b1: %f %zu\n");
+
+    evaluator.multiply_reduced_error(b1,p,relin_keys,outputs);
+    evaluator.rescale_to_next_inplace(outputs);
+
+    evaluator.multiply_inplace_reduced_error(b2,q,relin_keys);
+    evaluator.rescale_to_next_inplace(b2);
+
+    evaluator.multiply_inplace_reduced_error(b3,inputs,relin_keys);
+    evaluator.rescale_to_next_inplace(b3);
+    
+    // Add components together in piecewise fashion
+    evaluator.add_inplace_reduced_error(outputs,b2);
+    evaluator.add_inplace_reduced_error(outputs,b3);
+
+    return;
 }
 
 /*

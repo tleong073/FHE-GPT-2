@@ -1,11 +1,12 @@
 #include "approx.h"
 #include "util.h"
 #include <cassert>
+#include <chrono>
 
 using namespace std;
 using namespace seal;
 using namespace minicomp;
-
+using namespace chrono;
 
 void col_matrix_multiplication_seal_print( vector<TensorCipher> &left_inputs, vector<TensorCipher> &right_inputs, vector<TensorCipher> &outputs, vector<double> bias,
 	int rows, int cols, Config &config, CKKSEncoder &encoder, Encryptor &encryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
@@ -171,8 +172,8 @@ void row_matrix_multiplication_seal( vector<Ciphertext> &left_inputs, vector<Cip
 
 						desired_location = cipher_chunk*out_chunk_size + chunk_offset;
 						shift_amt = desired_location - pos*chunk_size;
-						//evaluator.rotate_vector_inplace(masked_out,-shift_amt,gal_keys);
-						rotate_inplace(masked_out,-shift_amt,evaluator,gal_keys);
+
+						evaluator.rotate_vector_inplace(masked_out,-shift_amt,gal_keys);
 						evaluator.add_inplace_reduced_error(outputs[cipher_idx],masked_out);
 					}
 				}
@@ -241,78 +242,107 @@ void diagonal_to_row_matrix_seal( vector<TensorCipher>&inputs,vector<TensorCiphe
  * @param argMap current procedure's arguments
  */
 void attn_proj_row_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
-	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys)
+{
 
 		// Row and column dimension computations
 
-		int row,col,abs_pos,head_row,head_col,head,desired_location,shift_amt;
 		Ciphertext cipher, rolled,folded,res,res1,masked_out,tmp_cipher;
 		vector<Plaintext> encoded_weights;
 
-		TensorCipher t_cipher,tmp_tcipher;
+		vvec masks;
+		vec v(32768,0.0);
+		int k;
+		for(k=0;k<16;k++){
+			v = vec(32768,0.0);
+			v[k*2048] = 1.0;
+			masks.push_back(v);
+		}
+
+		vc cipher_pool(32);
+		vc working_pool(32*16);
+
+		duration<double> sec; 
+		omp_lock_t pool_lock;
+		omp_init_lock(&pool_lock);
+		vector<omp_lock_t> head_locks(12);
+		vector<omp_lock_t> thread_locks(32);
+		// Set up locks
+		for(int i=0;i<12; i++){
+ 			omp_init_lock(&head_locks[i]);
+		}
+		for(int i=0;i<32; i++){
+			omp_init_lock(&thread_locks[i]);
+		}
+
+
 
 		// Cannot assume size, since KV-caching requires two different sizes
+		#pragma omp parallel for num_threads(THREAD_NUM) collapse(2)
 		for(int i = 0; i<left_inputs.size();i++){
-			for(int j = 0; j<weights.size();j++) {
+			for(int j = 0; j<weights.size();j++){
+				auto time = system_clock::now();
+				int id = omp_get_thread_num();
+				//printf("I am thread: %d\n",id);
+
+				for(int k = 0; k<16;k++){
+					//printf("I am a looping thread: %d %d %d\n",id,k,id*16+k);
+					evaluator.multiply_vector_reduced_error(weights[j],masks[0],working_pool[id*16+k]);
+					evaluator.rescale_to_next_inplace(working_pool[id*16+k]);
+					
+					evaluator.rotate_vector_inplace(working_pool[id*16+k],-1024,gal_keys);
+					quickSum(working_pool[id*16+k],working_pool[id*16+k],1024,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+				}
 				for(int rots = 0; rots<16;rots++){
-					printf("HEADER: %d %d %d\n",i,j,rots);
+					for(int pos = 0; pos<16; pos++) {
+						int abs_pos,head_col,head,desired_location,shift_amt;
 
-					tmp_cipher = weights[j];
-					rotate_inplace(tmp_cipher,rots*2048,evaluator,gal_keys);
-					evaluator.multiply_reduced_error(left_inputs[i],tmp_cipher,relin_keys,res1);
-					evaluator.rescale_to_next_inplace(res1);
+						abs_pos = (i * 16 + pos)*W_cols+(j * 16 + ((rots + pos) % 16));
 
-					evaluator.rotate_vector(res1,-1024,gal_keys,rolled);
-					evaluator.add_inplace_reduced_error(rolled,res1);
-
-					if(i == 0 && j == 0 && rots == 0){
-						printf("Printing Res: \n");
-						decrypt_and_print_and_max_round(rolled,decryptor,encoder,1.0,0);
-					}
-
-					// Preform Row/Vector Dot product
-					quickSum(rolled,res,1024,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-
-
-					for(int pos = 0; pos<16;pos++) {
-						row = i * 16 + pos;
-						col = j * 16 + ((rots + pos) % 16);
-
-						abs_pos = row*W_cols+col;
-
-						head_row = abs_pos / 64;
 						head_col = abs_pos % 64;
-						head = head_row % 12;
+						head = (abs_pos / 64) % 12;
 
-						mask_out(res,masked_out,pos*2048,1,encoder,evaluator,relin_keys);
-						decrypt_and_print_and_max_round(masked_out,decryptor,encoder,1.0,0);
-						desired_location = row*A_rows+head_col;
+						//printf("HERE I AM THREAD: %d\n",id);
+						//mask_out(cipher,l_cipher,pos*2048,1,encoder,evaluator,relin_keys);
+						evaluator.multiply_vector_reduced_error(working_pool[id*16+rots],masks[pos],cipher_pool[id]);
+						evaluator.rescale_to_next_inplace(cipher_pool[id]);
+						
+						//decrypt_and_print_and_max_round(masked_out,decryptor,encoder,1.0,0);
+						desired_location = (i * 16 + pos)*A_rows+head_col;
 
 						shift_amt = desired_location - pos*2048;
-						printf("Shift amt: %d\n",shift_amt);
-
-						/*
-						vector<int> steps;
-						steps.push_back(-shift_amt);
-						GaloisKeys tmp_keys;
-						keygen.create_galois_keys(steps,tmp_keys);
-						evaluator.rotate_vector_inplace(masked_out,-shift_amt,tmp_keys);
-						*/
 						
-
+						// printf("Shift amt: %d %d %d\n",i,j,shift_amt);
+						
 						// A bit jank, but we with our limited memory, we cant store all the Galois Keys for now.
-						surefire_rotate(masked_out,shift_amt, keygen, evaluator);
+						//surefire_rotate(masked_out,shift_amt, keygen, evaluator);
+						// !!!!!!!! TAKE OUT WHEN DOING CORRECTNESS. TEMPORARY MEMORY SAVING FEATURE !!!!!!!
+						evaluator.rotate_vector_inplace(cipher_pool[id],0,gal_keys);
 
-						printf("desired_location: %d %d %d %d\n",desired_location,shift_amt,pos,outputs[head].is_transparent());
-						evaluator.add_inplace_reduced_error(outputs[head],masked_out);
-						
-						printf("desired_location: %d\n",desired_location);
-						
-						decrypt_and_print_and_max_round(outputs[head],decryptor,encoder,1.0,0);
-					}
+						//decrypt_and_print_and_max_round(pool2[rots*16+pos],decryptor,encoder,1.0,0);
+						//printf("desired_location: %d %d %d %d\n",desired_location,shift_amt,pos,outputs[head].is_transparent());
+						omp_set_lock(&head_locks[head]);
+						evaluator.add_inplace_reduced_error(outputs[head],cipher_pool[id]);
+						omp_unset_lock(&head_locks[head]);
 				}
 			}
+			
+
+			duration<double> sec = system_clock::now() - time;
+    		cout << "attn_proj time : " << sec.count() << "s" << endl;
+		}
 	}
+
+	// Tear down locks
+	omp_destroy_lock(&pool_lock);
+	for(int i=0;i<12; i++){
+		omp_destroy_lock(&head_locks[i]);
+	}
+	for(int i=0;i<32; i++){
+		omp_destroy_lock(&thread_locks[i]);
+	}
+	
 	for(int i = 0; i<outputs.size();i++)
 		evaluator.add_inplace_reduced_error(outputs[i],bias);
 	return;
@@ -330,30 +360,59 @@ void attn_proj_row_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &we
 void attn_proj_col_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
 	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
 
-		// Row and column dimension computations
 
-		int row,col,abs_pos,head_row,head_col,head,desired_location,shift_amt;
+	// Row and column dimension computations
+
 		Ciphertext cipher, rolled,folded,res,res1,masked_out,tmp_cipher;
 		vector<Plaintext> encoded_weights;
 
-		TensorCipher t_cipher,tmp_tcipher;
+		vvec masks;
+		vec v(32768,0.0);
+		int k;
+		for(k=0;k<16;k++){
+			v = vec(32768,0.0);
+			v[k*2048] = 1.0;
+			masks.push_back(v);
+		}
 
-		for(int i = 0; i<8;i++){
-			for(int j = 0; j<48;j++) {
+		vc cipher_pool(32);
+		vc working_pool(32*16);
+
+		duration<double> sec; 
+		omp_lock_t pool_lock;
+		omp_init_lock(&pool_lock);
+		vector<omp_lock_t> head_locks(12);
+		vector<omp_lock_t> thread_locks(32);
+		// Set up locks
+		for(int i=0;i<12; i++){
+ 			omp_init_lock(&head_locks[i]);
+		}
+		for(int i=0;i<32; i++){
+			omp_init_lock(&thread_locks[i]);
+		}
+
+
+
+		// Cannot assume size, since KV-caching requires two different sizes
+		#pragma omp parallel for num_threads(THREAD_NUM) collapse(2)
+		for(int i = 0; i<left_inputs.size();i++){
+			for(int j = 0; j<weights.size();j++){
+				auto time = system_clock::now();
+				int id = omp_get_thread_num();
+				//printf("I am thread: %d\n",id);
+
+				for(int k = 0; k<16;k++){
+					//printf("I am a looping thread: %d %d %d\n",id,k,id*16+k);
+					evaluator.multiply_vector_reduced_error(weights[j],masks[0],working_pool[id*16+k]);
+					evaluator.rescale_to_next_inplace(working_pool[id*16+k]);
+					
+					evaluator.rotate_vector_inplace(working_pool[id*16+k],-1024,gal_keys);
+					quickSum(working_pool[id*16+k],working_pool[id*16+k],1024,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+				}
 				for(int rots = 0; rots<16;rots++){
-					tmp_cipher = weights[j];
-					rotate_inplace(tmp_cipher,rots*2048,evaluator,gal_keys);
-					evaluator.multiply_reduced_error(left_inputs[i],tmp_cipher,relin_keys,res1);
-					evaluator.rescale_to_next_inplace(res1);
+					for(int pos = 0; pos<16; pos++) {
+						int row,col,abs_pos,head_row,head_col,head,desired_location,shift_amt;
 
-					tmp_cipher = res1;
-					evaluator.rotate_vector_inplace(tmp_cipher,-1024,gal_keys);
-					evaluator.add_inplace_reduced_error(tmp_cipher,res1);
-
-					// Preform Row/Vector Dot product
-					quickSum(tmp_cipher,res,1024,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-
-					for(int pos = 0; pos<16;pos++) {
 						row = i * 16 + pos;
 						col = j * 16 + ((rots + pos) % 16);
 
@@ -363,24 +422,50 @@ void attn_proj_col_seal( vector<Ciphertext> &left_inputs, vector<Ciphertext> &we
 						head_col = abs_pos % 64;
 						head = head_row % 12;
 
-						mask_out(res,masked_out,pos*2048,1,encoder,evaluator,relin_keys);
-
-						desired_location = head_col*256+row;
+						//printf("HERE I AM THREAD: %d\n",id);
+						//mask_out(cipher,l_cipher,pos*2048,1,encoder,evaluator,relin_keys);
+						evaluator.multiply_vector_reduced_error(working_pool[id*16+rots],masks[pos],cipher_pool[id]);
+						evaluator.rescale_to_next_inplace(cipher_pool[id]);
+						
+						//decrypt_and_print_and_max_round(masked_out,decryptor,encoder,1.0,0);
+						desired_location = (i * 16 + pos)*A_rows+head_col;
 
 						shift_amt = desired_location - pos*2048;
+						
+						// printf("Shift amt: %d %d %d\n",i,j,shift_amt);
+						
 						// A bit jank, but we with our limited memory, we cant store all the Galois Keys for now.
-						surefire_rotate(masked_out,shift_amt, keygen, evaluator);
+						//surefire_rotate(masked_out,shift_amt, keygen, evaluator);
+						// !!!!!!!! TAKE OUT WHEN DOING CORRECTNESS. TEMPORARY MEMORY SAVING FEATURE !!!!!!!
+						evaluator.rotate_vector_inplace(cipher_pool[id],0,gal_keys);
 
-						evaluator.add_inplace_reduced_error(outputs[head],masked_out);
-					}
+						//decrypt_and_print_and_max_round(pool2[rots*16+pos],decryptor,encoder,1.0,0);
+						//printf("desired_location: %d %d %d %d\n",desired_location,shift_amt,pos,outputs[head].is_transparent());
+						omp_set_lock(&head_locks[head]);
+						evaluator.add_inplace_reduced_error(outputs[head],cipher_pool[id]);
+						omp_unset_lock(&head_locks[head]);
 				}
 			}
-		}
+			
 
+			duration<double> sec = system_clock::now() - time;
+    		cout << "attn_proj time : " << sec.count() << "s" << endl;
+		}
+	}
+
+	// Tear down locks
+	omp_destroy_lock(&pool_lock);
+	for(int i=0;i<12; i++){
+		omp_destroy_lock(&head_locks[i]);
+	}
+	for(int i=0;i<32; i++){
+		omp_destroy_lock(&thread_locks[i]);
+	}
+	
 	for(int i = 0; i<outputs.size();i++)
 		evaluator.add_inplace_reduced_error(outputs[i],bias);
-
 	return;
+	
 }
 
 /**
@@ -396,22 +481,24 @@ void qk_matmul( vector<Ciphertext> &Q, vector<Ciphertext> &K, vector<Ciphertext>
 	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
 
 		// Row and column dimension computations
-
 		int row,col,abs_pos,head_row,head_col,head,desired_location,shift_amt;
 		Ciphertext cipher, rolled,folded,res,res1,masked_out,tmp_cipher;
 		vector<Plaintext> encoded_weights;
 
-		int i,rots,pos;
-		for(i = 0; i<Q.size();i++){
-			evaluator.rotate_vector_inplace(K[i],32768-16384,gal_keys);
-			for(rots=0;rots<128;rots++){
+		for(int i = 0; i<Q.size();i++){
+			// Duplicate right so that left rots eventually contain all products
+			evaluator.rotate_vector(K[i],16384,gal_keys,rolled);
+			evaluator.add_inplace_reduced_error(K[i],rolled);
+
+			#pragma omp parallel for num_threads(THREAD_NUM)
+			for(int rots=0;rots<128;rots++){
 				// mul, roll and fold to perform dot product between A's ith row and K's (i+rot) col
 				evaluator.multiply_reduced_error(Q[i],K[i],relin_keys,cipher);
 				evaluator.rescale_to_next_inplace(cipher);
 
 				evaluator.rotate_vector(cipher,32768-64,gal_keys,rolled);
 				quickSum(rolled,folded,64,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
-				for(pos=0;pos<128;pos++){
+				for(int pos=0;pos<128;pos++){
 					row = i * 128 + pos;
 					col = i * 128 + ((rots + pos) % 128);
 
@@ -493,6 +580,99 @@ void sv_matmul( vector<Ciphertext> &S, vector<Ciphertext> &V, vector<Ciphertext>
 			}
 		}
 
+	return;
+}
+
+void cipher_plain_128_128( Ciphertext &left_input, unordered_map<string,vector<double>> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys)
+{	
+	int rots;
+	vector<Ciphertext> prod0_left(32),prod0_right(32),prod1_left(32),prod1_right(32),tmp,l_tmp(32),r_tmp(32),out0(32),out1(32);
+
+	#pragma omp parallel for num_threads(THREAD_NUM)
+	for(rots=0;rots<128;rots++){
+		auto start = system_clock::now();
+		int id = omp_get_thread_num();
+		// TODO: Replace with proper key once weight infrastrcture is set up
+		evaluator.multiply_vector_reduced_error(left_input,weights["test"],prod0_left[id]);
+		evaluator.rescale_to_next_inplace(prod0_left[id]);
+
+		evaluator.multiply_vector_reduced_error(left_input,weights["test"],prod0_right[id]);
+		evaluator.rescale_to_next_inplace(prod0_right[id]);
+
+		evaluator.multiply_vector_reduced_error(left_input,weights["test"],prod1_left[id]);
+		evaluator.rescale_to_next_inplace(prod1_left[id]);
+
+		evaluator.multiply_vector_reduced_error(left_input,weights["test"],prod1_right[id]);
+		evaluator.rescale_to_next_inplace(prod1_right[id]);
+
+		//Fold left and right
+		quickSum(prod0_left[id],prod0_left[id],128,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+		quickSum(prod0_right[id],prod0_right[id],128,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+		//quickSum(prod1_left[id],prod1_left[id],64,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+		//quickSum(prod1_right[id],prod1_right[id],64,encoder,encryptor,decryptor,evaluator,gal_keys,relin_keys);
+
+		// Accumulate
+		evaluator.multiply_vector_reduced_error(prod0_left[id],weights["test"],l_tmp[id]);
+		evaluator.multiply_vector_reduced_error(prod0_right[id],weights["test"],r_tmp[id]);
+		evaluator.add(l_tmp[id],r_tmp[id],out0[id]);
+		evaluator.rescale_to_next_inplace(out0[id]);
+
+		//evaluator.multiply_vector_reduced_error(prod0_left[id],weights["test"],l_tmp[id]);
+		//evaluator.multiply_vector_reduced_error(prod0_right[id],weights["test"],r_tmp[id]);
+		//evaluator.add(l_tmp[id],r_tmp[id],out1[id]);
+		//evaluator.rescale_to_next_inplace(out1[id]);
+		duration<double> sec = system_clock::now() - start;
+		cout << "cipher_plain_128 : " << sec.count() << "s" << endl;
+	}
+}
+
+void batch_matmul( vector<Ciphertext> &left_inputs, unordered_map<string,vector<double>> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
+		int i,j;
+		vc cipher(128);
+			
+		for(i=0;i<64;i++){
+			auto start = system_clock::now();
+			#pragma omp parallel for num_threads(THREAD_NUM)
+			for(j=0;j<128;j++){
+				evaluator.multiply_vector_reduced_error(left_inputs[j],weights["test"],cipher[j]);
+				evaluator.rescale_to_next_inplace(cipher[j]);
+			}
+			evaluator.add_many(cipher,outputs[i]);
+
+			duration<double> sec = system_clock::now() - start;
+			cout << "batch mul time : " << sec.count() << "s" << endl;
+		}
+	
+	return;
+}
+
+void qk_matmul_col( vector<Ciphertext> &left_input,vector<Ciphertext> &right_input, unordered_map<string,vector<double>> &weights,Ciphertext bias, vector<Ciphertext> &outputs,
+	int A_rows, int A_cols,int W_rows,int W_cols,KeyGenerator &keygen, CKKSEncoder &encoder, Encryptor &encryptor, Decryptor &decryptor, Evaluator &evaluator, GaloisKeys &gal_keys, RelinKeys &relin_keys) {
+		int i,j;
+		vc cipher(64);
+			
+		for(i=0;i<128;i++){
+			auto start = system_clock::now();
+
+			#pragma omp parallel for num_threads(THREAD_NUM)
+			for(j=0;j<64;j++){
+				evaluator.multiply_reduced_error(left_input[j],right_input[j],relin_keys,cipher[j]);
+				evaluator.rescale_to_next_inplace(cipher[j]);
+			}
+
+			evaluator.add_many(cipher,outputs[i]);
+
+			#pragma omp parallel for num_threads(THREAD_NUM)
+			for(j=0;j<64;j++){
+				evaluator.rotate_vector_inplace(right_input[j],1,gal_keys);
+			}
+
+			duration<double> sec = system_clock::now() - start;
+			cout << "batch mul time : " << sec.count() << "s" << endl;
+		}
+	
 	return;
 }
 
